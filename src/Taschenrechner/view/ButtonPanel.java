@@ -11,16 +11,17 @@ import java.awt.event.ActionListener;
 public class ButtonPanel extends JPanel {
     public ButtonPanel() {
         // 6 Zeilen × 5 Spalten, Abstand 5px
-        setLayout(new GridLayout(6, 5, 5, 5));
+        setLayout(new GridLayout(6, 6, 5, 5));
 
         String[] labels = {
-                "sin", "cos", "tan", "log", "√",
-                "7",   "8",   "9",   "/",   "^",
-                "4",   "5",   "6",   "*",   "(",
-                "1",   "2",   "3",   "-",   ")",
-                "0",   ".",   "=",   "+",   "C",
-                "CE",  "pi",  "e",   "exp", "ln"
+                "sin", "cos", "tan", "log", "ln",
+                "pi",  "e",   "exp", "√",   "^",
+                "7",   "8",   "9",   "(",   ")",
+                "4",   "5",   "6",   "/",   "CE",
+                "1",   "2",   "3",   "*",  "C",
+                "0",   ".",   "+",   "-",   "="
         };
+
 
         Color btnBg = new Color(60, 60, 60);
         Color btnText = new Color(230, 230, 230);

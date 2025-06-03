@@ -62,8 +62,6 @@ public class MainFrame extends JFrame {
     public MainFrame() {
         setTitle("Taschenrechner");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(700, 600);
-        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
         Color bgColor = UIManager.getColor("control");
@@ -81,11 +79,10 @@ public class MainFrame extends JFrame {
         sidebar.setPreferredSize(new Dimension(60, 0));
         sidebar.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
 
-        String basePath = "src/Taschenrechner/assets/";
-        // Erstelle drei Buttons für die Modi (Dateipfade verwenden)
-        JButton btnCalculator = createSidebarButton(basePath + "standard.png", sideBg);
-        JButton btnGraph      = createSidebarButton(basePath + "graph.png", sideBg);
-        JButton btnMatrix     = createSidebarButton(basePath + "matrix.png", sideBg);
+        // Erstelle drei Buttons für die Modi
+        JButton btnCalculator = createSidebarButton("/Taschenrechner/assets/standard.png", sideBg);
+        JButton btnGraph = createSidebarButton("/Taschenrechner/assets/graph.png", sideBg);
+        JButton btnMatrix = createSidebarButton("/Taschenrechner/assets/matrix.png", sideBg);
 
         sidebar.add(Box.createVerticalStrut(10));
         sidebar.add(btnCalculator);
@@ -111,13 +108,13 @@ public class MainFrame extends JFrame {
         buttonPanel = new ButtonPanel();
         buttonPanel.setBackground(bgColor);
 
-        // Tastatur-Interaktion konfigurieren
-        registerKeyBindings();
-
         calculatorPanel = new JPanel(new BorderLayout());
         calculatorPanel.setBackground(bgColor);
         calculatorPanel.add(displayPanel, BorderLayout.NORTH);
         calculatorPanel.add(buttonPanel, BorderLayout.CENTER);
+
+        // Tastatur-Interaktion konfigurieren
+        registerKeyBindings();
 
         // --- Graph View Panel ---
         GraphModel graphModel = new GraphModel(new PolynomialFunction(1, 0, 0)); // y = x
@@ -134,18 +131,39 @@ public class MainFrame extends JFrame {
         matrixLabel.setFont(new Font("Segoe UI", Font.PLAIN, 20));
         matrixPanel.add(matrixLabel, BorderLayout.CENTER);
 
+        // Panels zum CardPanel hinzufügen
         cardPanel.add(calculatorPanel, "calculator");
         cardPanel.add(graphViewPanel, "graph");
         cardPanel.add(matrixPanel, "matrix");
 
+        // Standardmäßig Calculator zeigen und Fenster passend setzen
+        setSize(400, 600);
+        setLocationRelativeTo(null);
         cardLayout.show(cardPanel, "calculator");
 
         ////////////////////////////
         // Sidebar Button Aktionen
         ////////////////////////////
-        btnCalculator.addActionListener(e -> cardLayout.show(cardPanel, "calculator"));
-        btnGraph.addActionListener(e -> cardLayout.show(cardPanel, "graph"));
-        btnMatrix.addActionListener(e -> cardLayout.show(cardPanel, "matrix"));
+        btnCalculator.addActionListener((ActionEvent e) -> {
+            cardLayout.show(cardPanel, "calculator");
+            // Größe für Rechner-Modus
+            setSize(400, 600);
+            setLocationRelativeTo(null);
+        });
+
+        btnGraph.addActionListener((ActionEvent e) -> {
+            cardLayout.show(cardPanel, "graph");
+            // Größe für Graph-Modus
+            setSize(800, 600);
+            setLocationRelativeTo(null);
+        });
+
+        btnMatrix.addActionListener((ActionEvent e) -> {
+            cardLayout.show(cardPanel, "matrix");
+            // Größe für Matrix-Modus (zwischen)
+            setSize(600, 600);
+            setLocationRelativeTo(null);
+        });
 
         ////////////////////////////
         // Komponenten hinzufügen
@@ -156,8 +174,8 @@ public class MainFrame extends JFrame {
         setVisible(true);
     }
 
-    private JButton createSidebarButton(String filePath, Color bg) {
-        ImageIcon icon = new ImageIcon(filePath);
+    private JButton createSidebarButton(String resourcePath, Color bg) {
+        ImageIcon icon = new ImageIcon(getClass().getResource(resourcePath));
         Image scaledImg = icon.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
         JButton btn = new JButton(new ImageIcon(scaledImg));
         btn.setBackground(bg);
