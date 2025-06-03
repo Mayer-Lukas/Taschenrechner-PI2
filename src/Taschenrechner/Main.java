@@ -1,9 +1,19 @@
 package Taschenrechner;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import javax.swing.SwingUtilities;
+
+import Taschenrechner.view.MainFrame;
+import Taschenrechner.controller.CalculatorController;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Test2");
+        SwingUtilities.invokeLater(() -> {
+            MainFrame frame = new MainFrame();
+            // Controller an DisplayPanel und ButtonPanel koppeln:
+            new CalculatorController(
+                    frame.getDisplayPanel(),
+                    frame.getButtonPanel()
+            );
+        });
     }
 }
