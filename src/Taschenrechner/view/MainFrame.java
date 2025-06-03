@@ -2,16 +2,29 @@ package Taschenrechner.view;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import Taschenrechner.controller.GraphController;
+import Taschenrechner.model.GraphModel;
+import Taschenrechner.model.PolynomialFunction;
 
 public class MainFrame extends JFrame {
     private final DisplayPanel displayPanel;
     private final ButtonPanel buttonPanel;
     private final JPanel sidebar;
+    private final JPanel cardPanel;
+    private final CardLayout cardLayout;
+
+    // Panels für die einzelnen Modi
+    private final JPanel calculatorPanel;
+    private final GraphViewPanel graphViewPanel;
+    private final JPanel matrixPanel;
 
     public MainFrame() {
         setTitle("Taschenrechner");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(500, 600);
+        // Gesamtgröße ggf. anpassen, da wir mehr Inhalte haben (Sidebar + Content)
+        setSize(700, 600);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
@@ -23,56 +36,117 @@ public class MainFrame extends JFrame {
 
         getContentPane().setBackground(bgColor);
 
-        /*
-         * Sidebar für Modus-Wechsel:
-         * Mit BoxLayout verhindern wir, dass die einzelnen Buttons die ganze vertikale Breite füllen.
-         * Außerdem bekommt die Sidebar eine feste Breite (hier 60px).
-         */
+        ////////////////////////////
+        // Sidebar für Moduswechsel
+        ////////////////////////////
         sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setBackground(sideBg);
-        sidebar.setPreferredSize(new Dimension(60, 0)); // fixe Breite
+        sidebar.setPreferredSize(new Dimension(60, 0)); // feste Breite
 
-        String basePath = "src/Taschenrechner/assets/"; // Pfad relativ zum Projekt
-        String[] imageFiles = {"standard.png", "graph.png", "matrix.png"};
+        String basePath = "src/Taschenrechner/assets/";
+        // Erstelle drei Buttons für die Modi
+        JButton btnCalculator = createSidebarButton(basePath + "standard.png", accentColor);
+        JButton btnGraph = createSidebarButton(basePath + "graph.png", accentColor);
+        JButton btnMatrix = createSidebarButton(basePath + "matrix.png", accentColor);
 
-        sidebar.add(Box.createVerticalStrut(10)); // Abstand von oben
-        for (String fileName : imageFiles) {
-            String filePath = basePath + fileName;
-            ImageIcon icon = new ImageIcon(filePath);
-            Image scaledImg = icon.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
-            JButton modeButton = new JButton(new ImageIcon(scaledImg));
-            modeButton.setBackground(accentColor);
-            modeButton.setMaximumSize(new Dimension(50, 50));
-            modeButton.setPreferredSize(new Dimension(50, 50));
-            modeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-            sidebar.add(modeButton);
-            sidebar.add(Box.createVerticalStrut(10)); // Abstand zwischen Buttons
-        }
-        sidebar.add(Box.createVerticalGlue()); // flexible Lücke am unteren Rand
+        // Aufbau mit Abständen
+        sidebar.add(Box.createVerticalStrut(10));
+        sidebar.add(btnCalculator);
+        sidebar.add(Box.createVerticalStrut(10));
+        sidebar.add(btnGraph);
+        sidebar.add(Box.createVerticalStrut(10));
+        sidebar.add(btnMatrix);
+        sidebar.add(Box.createVerticalGlue());
 
-        /*
-         * Erstelle ein zentrales Content-Panel, das das DisplayPanel (oben) und das ButtonPanel (zentral) enthält.
-         * Dadurch weist das DisplayPanel nicht mehr über die Sidebar.
-         */
+        ////////////////////////////
+        // CardPanel für den zentralen Bereich
+        ////////////////////////////
+        cardLayout = new CardLayout();
+        cardPanel = new JPanel(cardLayout);
+        cardPanel.setBackground(bgColor);
+
+        // --- Calculator Panel ---
         displayPanel = new DisplayPanel();
         displayPanel.setBackground(bgColor);
         displayPanel.setForeground(textColor);
-        // Optional: moderner Rahmen im DisplayPanel
         displayPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         buttonPanel = new ButtonPanel();
         buttonPanel.setBackground(bgColor);
 
-        JPanel contentPanel = new JPanel(new BorderLayout());
-        contentPanel.setBackground(bgColor);
-        contentPanel.add(displayPanel, BorderLayout.NORTH);
-        contentPanel.add(buttonPanel, BorderLayout.CENTER);
+        calculatorPanel = new JPanel(new BorderLayout());
+        calculatorPanel.setBackground(bgColor);
+        calculatorPanel.add(displayPanel, BorderLayout.NORTH);
+        calculatorPanel.add(buttonPanel, BorderLayout.CENTER);
 
+        // --- Graph View Panel ---
+        // Hier wird ein Standard-Graph erstellt – zum Beispiel mit einer linearen Funktion als Platzhalter.
+        GraphModel graphModel = new GraphModel(new PolynomialFunction(1, 0, 0)); // y = x
+        GraphPanel graphPanel = new GraphPanel(graphModel);
+        graphViewPanel = new GraphViewPanel(graphPanel);
+        graphViewPanel.setBackground(bgColor);
+        // Verbinde die Logik (GraphController) mit dem GraphViewPanel
+        new GraphController(graphViewPanel, graphPanel);
+
+        // --- Matrix Panel ---
+        // Platzhalter-Panel
+        matrixPanel = new JPanel(new BorderLayout());
+        matrixPanel.setBackground(bgColor);
+        JLabel matrixLabel = new JLabel("Matrizenmodus (in Arbeit)", SwingConstants.CENTER);
+        matrixLabel.setForeground(textColor);
+        matrixPanel.add(matrixLabel, BorderLayout.CENTER);
+
+        // Füge die Panels dem CardPanel hinzu
+        cardPanel.add(calculatorPanel, "calculator");
+        cardPanel.add(graphViewPanel, "graph");
+        cardPanel.add(matrixPanel, "matrix");
+
+        // Standardmäßig den Calculator-Modus anzeigen
+        cardLayout.show(cardPanel, "calculator");
+
+        ////////////////////////////
+        // Sidebar Button Aktionen
+        ////////////////////////////
+        btnCalculator.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "calculator");
+            }
+        });
+
+        btnGraph.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "graph");
+            }
+        });
+
+        btnMatrix.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "matrix");
+            }
+        });
+
+        ////////////////////////////
+        // Komponenten hinzufügen
+        ////////////////////////////
         add(sidebar, BorderLayout.WEST);
-        add(contentPanel, BorderLayout.CENTER);
+        add(cardPanel, BorderLayout.CENTER);
 
         setVisible(true);
+    }
+
+    private JButton createSidebarButton(String filePath, Color accentColor) {
+        ImageIcon icon = new ImageIcon(filePath);
+        Image scaledImg = icon.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
+        JButton btn = new JButton(new ImageIcon(scaledImg));
+        btn.setBackground(accentColor);
+        btn.setMaximumSize(new Dimension(50, 50));
+        btn.setPreferredSize(new Dimension(50, 50));
+        btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        return btn;
     }
 
     public DisplayPanel getDisplayPanel() {
