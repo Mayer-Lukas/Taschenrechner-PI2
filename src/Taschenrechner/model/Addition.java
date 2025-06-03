@@ -6,3 +6,10 @@ public class Addition implements Operator {
         return a + b;
     }
 }
+
+
+
+
+
+
+
