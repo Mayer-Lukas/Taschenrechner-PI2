@@ -19,8 +19,6 @@ public class CalculatorController implements ActionListener {
         this.display = display;
         this.buttons = buttons;
         this.parser = new ExpressionParser();
-
-        // Listener für alle Buttons registrieren:
         this.buttons.addButtonListener(this);
     }
 
@@ -52,18 +50,50 @@ public class CalculatorController implements ActionListener {
                     // Optional: Ergebnis als neuer Input
                     currentInput.setLength(0);
                     currentInput.append(result);
-                } catch (ParseException ex) {
-                    display.setText("Fehler");
-                    currentInput.setLength(0);
-                } catch (ArithmeticException ex) {
-                    // z. B. Division durch 0
+                } catch (ParseException | ArithmeticException ex) {
                     display.setText("Fehler");
                     currentInput.setLength(0);
                 }
                 break;
 
+            // ---------- Funktionen, √, Konstanten, ^ ----------
+            case "sin":
+            case "cos":
+            case "tan":
+            case "log":
+            case "ln":
+            case "exp":
+                // Hänge "funkName(" an, z. B. "sin(" oder "log("
+                currentInput.append(cmd).append("(");
+                display.setText(currentInput.toString());
+                break;
+
+            case "√":
+                // Wir übersetzen "√" in "sqrt("
+                currentInput.append("sqrt(");
+                display.setText(currentInput.toString());
+                break;
+
+            case "^":
+                currentInput.append("^");
+                display.setText(currentInput.toString());
+                break;
+
+            case "pi":
+                // Füge π ein (Java-Präzision)
+                currentInput.append(Math.PI);
+                display.setText(currentInput.toString());
+                break;
+
+            case "e":
+                // Füge e ein
+                currentInput.append(Math.E);
+                display.setText(currentInput.toString());
+                break;
+
+            // ---------- Standard: Ziffern, Punkt, einfache Operatoren, Klammern ----------
             default:
-                // Ziffer, Punkt, Operator, Klammer → anhängen
+                // Lande hier, wenn cmd z. B. "0".."9", ".", "+", "-", "*", "/", "(", ")"
                 currentInput.append(cmd);
                 display.setText(currentInput.toString());
         }

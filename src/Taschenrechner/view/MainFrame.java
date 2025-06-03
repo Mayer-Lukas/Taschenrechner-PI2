@@ -10,8 +10,8 @@ public class MainFrame extends JFrame {
     public MainFrame() {
         setTitle("Taschenrechner");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(300, 400);
-        setLocationRelativeTo(null); // zentriert auf Bildschirm
+        setSize(350, 450);
+        setLocationRelativeTo(null); // zentriert
 
         setLayout(new BorderLayout());
 

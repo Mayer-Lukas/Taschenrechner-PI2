@@ -2,7 +2,7 @@ package Taschenrechner.model;
 
 
 
-public class Exponential implements Operator {
+public class Exponentiation implements Operator {
     @Override
     public double apply(double a, double b) {
         return Math.pow(a, b);
