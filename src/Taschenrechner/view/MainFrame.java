@@ -3,7 +3,7 @@ package Taschenrechner.view;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import Taschenrechner.controller.GraphController;
 import Taschenrechner.model.GraphModel;
 import Taschenrechner.model.PolynomialFunction;
@@ -82,12 +82,11 @@ public class MainFrame extends JFrame {
         sidebar.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
 
         String basePath = "src/Taschenrechner/assets/";
-        // Erstelle drei Buttons für die Modi
+        // Erstelle drei Buttons für die Modi (Dateipfade verwenden)
         JButton btnCalculator = createSidebarButton(basePath + "standard.png", sideBg);
-        JButton btnGraph = createSidebarButton(basePath + "graph.png", sideBg);
-        JButton btnMatrix = createSidebarButton(basePath + "matrix.png", sideBg);
+        JButton btnGraph      = createSidebarButton(basePath + "graph.png", sideBg);
+        JButton btnMatrix     = createSidebarButton(basePath + "matrix.png", sideBg);
 
-        // Aufbau mit Abständen
         sidebar.add(Box.createVerticalStrut(10));
         sidebar.add(btnCalculator);
         sidebar.add(Box.createVerticalStrut(10));
@@ -112,6 +111,9 @@ public class MainFrame extends JFrame {
         buttonPanel = new ButtonPanel();
         buttonPanel.setBackground(bgColor);
 
+        // Tastatur-Interaktion konfigurieren
+        registerKeyBindings();
+
         calculatorPanel = new JPanel(new BorderLayout());
         calculatorPanel.setBackground(bgColor);
         calculatorPanel.add(displayPanel, BorderLayout.NORTH);
@@ -122,7 +124,6 @@ public class MainFrame extends JFrame {
         GraphPanel graphPanel = new GraphPanel(graphModel);
         graphViewPanel = new GraphViewPanel(graphPanel);
         graphViewPanel.setBackground(bgColor);
-        // Verbinde die Logik (GraphController) mit dem GraphViewPanel
         new GraphController(graphViewPanel, graphPanel);
 
         // --- Matrix Panel ---
@@ -133,37 +134,18 @@ public class MainFrame extends JFrame {
         matrixLabel.setFont(new Font("Segoe UI", Font.PLAIN, 20));
         matrixPanel.add(matrixLabel, BorderLayout.CENTER);
 
-        // Füge die Panels dem CardPanel hinzu
         cardPanel.add(calculatorPanel, "calculator");
         cardPanel.add(graphViewPanel, "graph");
         cardPanel.add(matrixPanel, "matrix");
 
-        // Standardmäßig den Calculator-Modus anzeigen
         cardLayout.show(cardPanel, "calculator");
 
         ////////////////////////////
         // Sidebar Button Aktionen
         ////////////////////////////
-        btnCalculator.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "calculator");
-            }
-        });
-
-        btnGraph.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "graph");
-            }
-        });
-
-        btnMatrix.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "matrix");
-            }
-        });
+        btnCalculator.addActionListener(e -> cardLayout.show(cardPanel, "calculator"));
+        btnGraph.addActionListener(e -> cardLayout.show(cardPanel, "graph"));
+        btnMatrix.addActionListener(e -> cardLayout.show(cardPanel, "matrix"));
 
         ////////////////////////////
         // Komponenten hinzufügen
@@ -185,6 +167,82 @@ public class MainFrame extends JFrame {
         btn.setFocusPainted(false);
         btn.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         return btn;
+    }
+
+    private void registerKeyBindings() {
+        java.util.List<JButton> allButtons = findAllButtons(buttonPanel);
+
+        InputMap im = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap am = getRootPane().getActionMap();
+
+        final JButton[] equalsButton = {null};
+        final JButton[] clearButton  = {null};
+        final JButton[] deleteButton = {null};
+
+        for (JButton btn : allButtons) {
+            String text = btn.getText();
+            if (text == null || text.isEmpty()) continue;
+
+            switch (text) {
+                case "="  -> equalsButton[0] = btn;
+                case "C"  -> clearButton[0]  = btn;
+                case "CE" -> deleteButton[0] = btn;
+            }
+
+            if (text.length() == 1) {
+                char keyChar = text.charAt(0);
+                String actionKey = "key_" + keyChar;
+                im.put(KeyStroke.getKeyStroke(keyChar), actionKey);
+                am.put(actionKey, new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        btn.doClick();
+                    }
+                });
+            }
+        }
+
+        if (equalsButton[0] != null) {
+            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "equals_key");
+            am.put("equals_key", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    equalsButton[0].doClick();
+                }
+            });
+        }
+
+        if (deleteButton[0] != null) {
+            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), "delete_key");
+            am.put("delete_key", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    deleteButton[0].doClick();
+                }
+            });
+        }
+
+        if (clearButton[0] != null) {
+            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "clear_key");
+            am.put("clear_key", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    clearButton[0].doClick();
+                }
+            });
+        }
+    }
+
+    private java.util.List<JButton> findAllButtons(Container container) {
+        java.util.List<JButton> buttons = new java.util.ArrayList<>();
+        for (Component comp : container.getComponents()) {
+            if (comp instanceof JButton button) {
+                buttons.add(button);
+            } else if (comp instanceof Container child) {
+                buttons.addAll(findAllButtons(child));
+            }
+        }
+        return buttons;
     }
 
     public DisplayPanel getDisplayPanel() {
