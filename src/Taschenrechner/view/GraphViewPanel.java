@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 
 /**
- * GraphViewPanel mit schickem Input-Bereich, Zoom-Hinweis & Checkbox.
+ * GraphViewPanel mit Input-Bereich, Zoom-Hinweis, Checkbox und Listener für Ableitung.
  */
 public class GraphViewPanel extends JPanel {
     private final JTextField functionInput;
@@ -18,7 +18,6 @@ public class GraphViewPanel extends JPanel {
         setLayout(new BorderLayout());
         setBackground(UIManager.getColor("control"));
 
-        // Input-Bereich oben
         JPanel inputPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         inputPanel.setBackground(UIManager.getColor("control"));
 
@@ -41,6 +40,9 @@ public class GraphViewPanel extends JPanel {
         derivativeCheckBox.setBackground(UIManager.getColor("control"));
         derivativeCheckBox.setForeground(UIManager.getColor("text"));
         derivativeCheckBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        derivativeCheckBox.addActionListener(e -> {
+            graphPanel.setShowDerivative(derivativeCheckBox.isSelected());
+        });
 
         JLabel zoomHint = new JLabel("Scrollen zum Zoomen");
         zoomHint.setForeground(new Color(200, 200, 200));
