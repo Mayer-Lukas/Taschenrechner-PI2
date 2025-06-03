@@ -15,43 +15,62 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // Farben für Dark Mode
+        // Farben im Dark Mode
         Color bgColor = new Color(45, 45, 45);
+        Color accentColor = new Color(70, 70, 70);
+        Color sideBg = new Color(30, 30, 30);
         Color textColor = new Color(230, 230, 230);
 
         getContentPane().setBackground(bgColor);
 
-        // Display Panel (oben)
+        /*
+         * Sidebar für Modus-Wechsel:
+         * Mit BoxLayout verhindern wir, dass die einzelnen Buttons die ganze vertikale Breite füllen.
+         * Außerdem bekommt die Sidebar eine feste Breite (hier 60px).
+         */
+        sidebar = new JPanel();
+        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
+        sidebar.setBackground(sideBg);
+        sidebar.setPreferredSize(new Dimension(60, 0)); // fixe Breite
+
+        String basePath = "src/Taschenrechner/assets/"; // Pfad relativ zum Projekt
+        String[] imageFiles = {"standard.png", "graph.png", "matrix.png"};
+
+        sidebar.add(Box.createVerticalStrut(10)); // Abstand von oben
+        for (String fileName : imageFiles) {
+            String filePath = basePath + fileName;
+            ImageIcon icon = new ImageIcon(filePath);
+            Image scaledImg = icon.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
+            JButton modeButton = new JButton(new ImageIcon(scaledImg));
+            modeButton.setBackground(accentColor);
+            modeButton.setMaximumSize(new Dimension(50, 50));
+            modeButton.setPreferredSize(new Dimension(50, 50));
+            modeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+            sidebar.add(modeButton);
+            sidebar.add(Box.createVerticalStrut(10)); // Abstand zwischen Buttons
+        }
+        sidebar.add(Box.createVerticalGlue()); // flexible Lücke am unteren Rand
+
+        /*
+         * Erstelle ein zentrales Content-Panel, das das DisplayPanel (oben) und das ButtonPanel (zentral) enthält.
+         * Dadurch weist das DisplayPanel nicht mehr über die Sidebar.
+         */
         displayPanel = new DisplayPanel();
         displayPanel.setBackground(bgColor);
         displayPanel.setForeground(textColor);
+        // Optional: moderner Rahmen im DisplayPanel
+        displayPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Button Panel (Zentral)
         buttonPanel = new ButtonPanel();
         buttonPanel.setBackground(bgColor);
 
-        // Sidebar (Links) für Modus-Wechsel
-        sidebar = new JPanel();
-        sidebar.setLayout(new GridLayout(3, 1, 5, 5));
-        sidebar.setBackground(new Color(30, 30, 30));
-
-        String basePath = "src/Taschenrechner/assets/"; // Pfad relativ zum Projekt
-
-        String[] imageFiles = { "standard.png", "graph.png", "matrix.png" };
-
-        for (String fileName : imageFiles) {
-            String filePath = basePath + fileName;
-            ImageIcon icon = new ImageIcon(filePath); // Direkt aus Dateipfad laden
-            Image scaledImg = icon.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
-            JButton modeButton = new JButton(new ImageIcon(scaledImg));
-            modeButton.setBackground(new Color(70, 70, 70));
-            sidebar.add(modeButton);
-        }
-
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setBackground(bgColor);
+        contentPanel.add(displayPanel, BorderLayout.NORTH);
+        contentPanel.add(buttonPanel, BorderLayout.CENTER);
 
         add(sidebar, BorderLayout.WEST);
-        add(displayPanel, BorderLayout.NORTH);
-        add(buttonPanel, BorderLayout.CENTER);
+        add(contentPanel, BorderLayout.CENTER);
 
         setVisible(true);
     }

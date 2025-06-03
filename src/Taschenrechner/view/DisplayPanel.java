@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Oberes Panel: Zeigt aktuellen Eingabetext oder Ergebnis an.
+ * Oberes Panel: Zeigt den aktuellen Eingabetext oder das Ergebnis an.
  */
 public class DisplayPanel extends JPanel {
     private final JTextField textField;
@@ -14,6 +14,11 @@ public class DisplayPanel extends JPanel {
         textField = new JTextField();
         textField.setEditable(false);
         textField.setFont(new Font("Arial", Font.PLAIN, 24));
+        // Moderner Border für das Textfeld:
+        textField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(70, 70, 70), 2),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
         add(textField, BorderLayout.CENTER);
     }
 
