@@ -10,6 +10,7 @@ import Taschenrechner.controller.GraphController;
 import Taschenrechner.controller.MatrixController;
 import Taschenrechner.model.GraphModel;
 import Taschenrechner.model.PolynomialFunction;
+import Taschenrechner.view.ComplexPanel; // Import für ComplexPanel
 
 public class MainFrame extends JFrame {
     private final DisplayPanel displayPanel;
@@ -74,10 +75,11 @@ public class MainFrame extends JFrame {
         sidebar.setPreferredSize(new Dimension(60, 0));
         sidebar.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
 
-        // Drei Buttons für die Modi
+        // Vier Buttons für die Modi
         JButton btnCalculator = createSidebarButton("/Taschenrechner/assets/standard.png", sideBg);
         JButton btnGraph      = createSidebarButton("/Taschenrechner/assets/graph.png",    sideBg);
         JButton btnMatrix     = createSidebarButton("/Taschenrechner/assets/matrix.png",  sideBg);
+        JButton btnComplex    = createSidebarButton("/Taschenrechner/assets/complex.png", sideBg);
 
         sidebar.add(Box.createVerticalStrut(10));
         sidebar.add(btnCalculator);
@@ -85,6 +87,8 @@ public class MainFrame extends JFrame {
         sidebar.add(btnGraph);
         sidebar.add(Box.createVerticalStrut(10));
         sidebar.add(btnMatrix);
+        sidebar.add(Box.createVerticalStrut(10));
+        sidebar.add(btnComplex);
         sidebar.add(Box.createVerticalGlue());
 
         // CardPanel für zentralen Bereich
@@ -120,10 +124,15 @@ public class MainFrame extends JFrame {
         matrixPanel.setBackground(bgColor);
         new MatrixController(matrixPanel);
 
+        // --- Complex Panel ---
+        ComplexPanel complexPanel = new ComplexPanel();
+        complexPanel.setBackground(bgColor);
+
         // Panels ins CardPanel einfügen
         cardPanel.add(calculatorPanel, "calculator");
         cardPanel.add(graphViewPanel,   "graph");
         cardPanel.add(matrixPanel,      "matrix");
+        cardPanel.add(complexPanel,     "complex");
 
         // Standardmäßig Rechner anzeigen
         setSize(400, 600);
@@ -144,6 +153,12 @@ public class MainFrame extends JFrame {
         btnMatrix.addActionListener((ActionEvent e) -> {
             cardLayout.show(cardPanel, "matrix");
             setSize(600, 600);
+            setLocationRelativeTo(null);
+        });
+        btnComplex.addActionListener((ActionEvent e) -> {
+            cardLayout.show(cardPanel, "complex");
+            // Fenster so groß wählen, dass "Berechnen"-Button sichtbar ist
+            setSize(650, 500);
             setLocationRelativeTo(null);
         });
 
