@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.util.Objects;
+
 import Taschenrechner.controller.GraphController;
 import Taschenrechner.model.GraphModel;
 import Taschenrechner.model.PolynomialFunction;
@@ -11,14 +13,8 @@ import Taschenrechner.model.PolynomialFunction;
 public class MainFrame extends JFrame {
     private final DisplayPanel displayPanel;
     private final ButtonPanel buttonPanel;
-    private final JPanel sidebar;
     private final JPanel cardPanel;
     private final CardLayout cardLayout;
-
-    // Panels für die einzelnen Modi
-    private final JPanel calculatorPanel;
-    private final GraphViewPanel graphViewPanel;
-    private final JPanel matrixPanel;
 
     static {
         // Nimbus Look & Feel aktivieren (Dark-Mode-Anpassung via UIManager)
@@ -70,10 +66,8 @@ public class MainFrame extends JFrame {
 
         getContentPane().setBackground(bgColor);
 
-        ////////////////////////////
         // Sidebar für Moduswechsel
-        ////////////////////////////
-        sidebar = new JPanel();
+        JPanel sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setBackground(sideBg);
         sidebar.setPreferredSize(new Dimension(60, 0));
@@ -92,9 +86,7 @@ public class MainFrame extends JFrame {
         sidebar.add(btnMatrix);
         sidebar.add(Box.createVerticalGlue());
 
-        ////////////////////////////
         // CardPanel für den zentralen Bereich
-        ////////////////////////////
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
         cardPanel.setBackground(bgColor);
@@ -108,7 +100,8 @@ public class MainFrame extends JFrame {
         buttonPanel = new ButtonPanel();
         buttonPanel.setBackground(bgColor);
 
-        calculatorPanel = new JPanel(new BorderLayout());
+        // Panels für die einzelnen Modi
+        JPanel calculatorPanel = new JPanel(new BorderLayout());
         calculatorPanel.setBackground(bgColor);
         calculatorPanel.add(displayPanel, BorderLayout.NORTH);
         calculatorPanel.add(buttonPanel, BorderLayout.CENTER);
@@ -119,12 +112,12 @@ public class MainFrame extends JFrame {
         // --- Graph View Panel ---
         GraphModel graphModel = new GraphModel(new PolynomialFunction(1, 0, 0)); // y = x
         GraphPanel graphPanel = new GraphPanel(graphModel);
-        graphViewPanel = new GraphViewPanel(graphPanel);
+        GraphViewPanel graphViewPanel = new GraphViewPanel(graphPanel);
         graphViewPanel.setBackground(bgColor);
         new GraphController(graphViewPanel, graphPanel);
 
         // --- Matrix Panel ---
-        matrixPanel = new JPanel(new BorderLayout());
+        JPanel matrixPanel = new JPanel(new BorderLayout());
         matrixPanel.setBackground(bgColor);
         JLabel matrixLabel = new JLabel("Matrizenmodus (in Arbeit)", SwingConstants.CENTER);
         matrixLabel.setForeground(textColor);
@@ -141,9 +134,7 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
         cardLayout.show(cardPanel, "calculator");
 
-        ////////////////////////////
         // Sidebar Button Aktionen
-        ////////////////////////////
         btnCalculator.addActionListener((ActionEvent e) -> {
             cardLayout.show(cardPanel, "calculator");
             // Größe für Rechner-Modus
@@ -165,9 +156,7 @@ public class MainFrame extends JFrame {
             setLocationRelativeTo(null);
         });
 
-        ////////////////////////////
         // Komponenten hinzufügen
-        ////////////////////////////
         add(sidebar, BorderLayout.WEST);
         add(cardPanel, BorderLayout.CENTER);
 
@@ -175,7 +164,7 @@ public class MainFrame extends JFrame {
     }
 
     private JButton createSidebarButton(String resourcePath, Color bg) {
-        ImageIcon icon = new ImageIcon(getClass().getResource(resourcePath));
+        ImageIcon icon = new ImageIcon(Objects.requireNonNull(getClass().getResource(resourcePath)));
         Image scaledImg = icon.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
         JButton btn = new JButton(new ImageIcon(scaledImg));
         btn.setBackground(bg);
