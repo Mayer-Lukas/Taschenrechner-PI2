@@ -92,54 +92,34 @@ public class FunctionParser {
         // Factor -> Primary [ '^' Factor ]
         public Function parseFactor() {
             Function base = parsePrimary();
+
             while (pos < input.length() && input.charAt(pos) == '^') {
                 pos++; // '^' überspringen
-                // Prüfe auf optional negativen Exponenten
-                boolean negativeExp = false;
-                if (pos < input.length() && input.charAt(pos) == '-') {
-                    negativeExp = true;
-                    pos++;
-                }
-                Function exponent = parseFactor();
 
-                // Versuche, Integer-Exponent aus konst. Polynom zu extrahieren
-                Integer expInt = null;
-                if (exponent instanceof PolynomialFunction) {
-                    double[] coeffs = ((PolynomialFunction) exponent).getCoefficients();
-                    if (coeffs.length == 1) {
-                        expInt = (int) Math.round(coeffs[0]);
-                        if (negativeExp) expInt = -expInt;
-                    }
-                }
-
-                if (expInt != null) {
-                    int e = expInt;
-                    if (base instanceof PolynomialFunction && e >= 0) {
-                        base = PolynomialFunction.pow((PolynomialFunction) base, e);
-                    } else {
-                        final int finalExp = e;
-                        Function oldBase = base;
-                        base = (double x) -> Math.pow(oldBase.evaluate(x), finalExp);
-                    }
+                Function exponent;
+                // Wenn geschweifte Klammer folgt → gruppierten Ausdruck parsen
+                if (pos < input.length() && input.charAt(pos) == '{') {
+                    pos++; // '{' überspringen
+                    exponent = parseExpression();
+                    expect('}'); // geschlossene '}'
+                } else if (Character.isDigit(input.charAt(pos))) {
+                    int exponentValue = parseNumberInt();
+                    exponent = new PolynomialFunction(exponentValue);
+                } else if (input.charAt(pos) == '(') {
+                    pos++; // '(' überspringen
+                    exponent = parseExpression();
+                    expect(')');
                 } else {
-                    // Allgemeiner Fall: Math.pow(base(x), exponent(x))
-                    Function signedExp;
-                    if (negativeExp) {
-                        Function oldExp = exponent;
-                        signedExp = (double x) -> -oldExp.evaluate(x);
-                    } else {
-                        signedExp = exponent;
-                    }
-                    Function oldBase = base;
-                    base = (double x) -> {
-                        double b = oldBase.evaluate(x);
-                        double eVal = signedExp.evaluate(x);
-                        return Math.pow(b, eVal);
-                    };
+                    throw new IllegalArgumentException("Erwarteter Exponent nach '^' an Position " + pos);
                 }
+
+                Function oldBase = base;
+                base = (double x) -> Math.pow(oldBase.evaluate(x), exponent.evaluate(x));
             }
+
             return base;
         }
+
 
         // Primary ->
         //   'ln' '(' Expr ')'
@@ -247,6 +227,12 @@ public class FunctionParser {
                 pos++;
                 Function expr = parseExpression();
                 expect(')');
+                return expr;
+            }
+            else if (input.charAt(pos) == '{') {
+                pos++; // '{' überspringen
+                Function expr = parseExpression();
+                expect('}');
                 return expr;
             }
 
