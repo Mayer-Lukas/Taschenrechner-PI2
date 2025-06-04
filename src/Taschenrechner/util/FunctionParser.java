@@ -156,7 +156,13 @@ public class FunctionParser {
             if (pos >= input.length()) {
                 throw new IllegalArgumentException("Unerwartetes Ende des Ausdrucks");
             }
-
+            // === sqrt(x) → Quadratwurzel ===
+            if (input.startsWith("sqrt", pos)) {
+                pos += 4; expect('(');
+                Function inner = parseExpression();
+                expect(')');
+                return (double x) -> Math.sqrt(inner.evaluate(x));
+            }
             // === ln(x) → natürlicher Log (Basis e) ===
             if (input.startsWith("ln", pos)
                     && pos + 2 < input.length()
@@ -217,7 +223,25 @@ public class FunctionParser {
                 expect(')');
                 return (double x) -> Math.tan(inner.evaluate(x));
             }
-
+            // === arcsin(x), arccos(x), arctan(x) ===
+            if (input.startsWith("arcsin", pos)) {
+                pos += 6; expect('(');
+                Function inner = parseExpression();
+                expect(')');
+                return (double x) -> Math.asin(inner.evaluate(x));
+            }
+            if (input.startsWith("arccos", pos)) {
+                pos += 6; expect('(');
+                Function inner = parseExpression();
+                expect(')');
+                return (double x) -> Math.acos(inner.evaluate(x));
+            }
+            if (input.startsWith("arctan", pos)) {
+                pos += 6; expect('(');
+                Function inner = parseExpression();
+                expect(')');
+                return (double x) -> Math.atan(inner.evaluate(x));
+            }
             // === Klammerausdruck ===
             if (input.charAt(pos) == '(') {
                 pos++;
