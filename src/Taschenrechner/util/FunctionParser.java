@@ -3,7 +3,6 @@ package Taschenrechner.util;
 import Taschenrechner.model.Function;
 import Taschenrechner.model.PolynomialFunction;
 
-
 public class FunctionParser {
 
     public static Function parse(String expression) throws IllegalArgumentException {
@@ -23,19 +22,12 @@ public class FunctionParser {
         return f;
     }
 
-    /**
-     * Fügt implizit Multiplikationszeichen ein, wenn z. B. eine Ziffer,
-     * ein 'x'/'X' oder eine schließende Klammer unmittelbar vor '(' steht.
-     * Dadurch wird z.B. aus "2x(x+1)"  "2x*(x+1)", aber bei "sin(x)" bleibt es "sin(x)".
-     */
     private static String preprocess(String expr) {
+        // Fügt '*' ein, wenn vor "(" eine Ziffer, 'x'/'X' oder ')' steht:
+        // z.B. "2x(x+1)" → "2x*(x+1)", aber "sin(x)" bleibt "sin(x)"
         return expr.replaceAll("(?<=[0-9xX)])\\(", "*(");
     }
 
-    /**
-     * Ein rekursiver Parser, der nun allgemeine Funktionsausdrücke
-     * (mittels Lambda-Ausdrücken) verarbeitet.
-     */
     private static class Parser {
         private final String input;
         private int pos;
@@ -53,23 +45,22 @@ public class FunctionParser {
                 if (ch == '+') {
                     pos++;
                     Function term = parseTerm();
-
+                    // Wenn beide Polynome, addiere exakt:
                     if (result instanceof PolynomialFunction && term instanceof PolynomialFunction) {
                         result = PolynomialFunction.add((PolynomialFunction) result, (PolynomialFunction) term);
                     } else {
-                        Function oldResult = result;
-                        result = (double x) -> oldResult.evaluate(x) + term.evaluate(x);
+                        Function old = result;
+                        result = (double x) -> old.evaluate(x) + term.evaluate(x);
                     }
                 }
                 else if (ch == '-') {
                     pos++;
                     Function term = parseTerm();
-
                     if (result instanceof PolynomialFunction && term instanceof PolynomialFunction) {
                         result = PolynomialFunction.subtract((PolynomialFunction) result, (PolynomialFunction) term);
                     } else {
-                        Function oldResult = result;
-                        result = (double x) -> oldResult.evaluate(x) - term.evaluate(x);
+                        Function old = result;
+                        result = (double x) -> old.evaluate(x) - term.evaluate(x);
                     }
                 }
                 else {
@@ -79,51 +70,112 @@ public class FunctionParser {
             return result;
         }
 
-        // Term -> Factor { '*' Factor }
+        // Term -> Factor { ('*' | '/') Factor }
         public Function parseTerm() {
             Function result = parseFactor();
-            while (pos < input.length() && input.charAt(pos) == '*') {
-                pos++; // '*' überspringen
-                Function factor = parseFactor();
+            while (pos < input.length()) {
+                char op = input.charAt(pos);
+                if (op == '*' || op == '/') {
+                    pos++;
+                    Function factor = parseFactor();
 
-                if (result instanceof PolynomialFunction && factor instanceof PolynomialFunction) {
-                    // beide Operanden sind Polynome → echte polynomiale Multiplikation
-                    result = PolynomialFunction.multiply((PolynomialFunction) result, (PolynomialFunction) factor);
+                    if (op == '*') {
+                        // Multiplikation
+                        if (result instanceof PolynomialFunction && factor instanceof PolynomialFunction) {
+                            result = PolynomialFunction.multiply((PolynomialFunction) result, (PolynomialFunction) factor);
+                        } else {
+                            Function old = result;
+                            result = (double x) -> old.evaluate(x) * factor.evaluate(x);
+                        }
+                    } else {
+                        // Division  →  always numerisch (keine exakte rationale Klasse vorhanden)
+                        Function old = result;
+                        result = (double x) -> old.evaluate(x) / factor.evaluate(x);
+                    }
                 } else {
-                    // mindestens einer ist keine PolynomialFunction → generisches Lambda
-                    Function oldResult = result;
-                    result = (double x) -> oldResult.evaluate(x) * factor.evaluate(x);
+                    break;
                 }
             }
             return result;
         }
 
-        // Factor -> Primary [ '^' Zahl ]
+        // Factor -> Primary [ '^' Factor ]
         public Function parseFactor() {
             Function base = parsePrimary();
+
+            // Solange '^' folgt, kette exponentielle Ausdrücke
             while (pos < input.length() && input.charAt(pos) == '^') {
                 pos++; // '^' überspringen
-                int exponent = parseNumberInt(); // Exponent als ganze Zahl
 
-                // Wenn base bereits ein PolynomialFunction ist, direkt potenzieren:
-                if (base instanceof PolynomialFunction) {
-                    base = PolynomialFunction.pow((PolynomialFunction) base, exponent);
+                // Prüfe auf optionalen negativen Exponenten (z.B. x^(-1))
+                boolean negativeExp = false;
+                if (pos < input.length() && input.charAt(pos) == '-') {
+                    negativeExp = true;
+                    pos++;
+                }
+
+                // Der nächste Ausdruck nach '^' ist wieder ein Factor (rekursiv)
+                Function exponent = parseFactor();
+
+                // Falls exponent eine konstante PolynomialFunction ist, extrahiere integer‐Wert:
+                Integer expInt = null;
+                if (exponent instanceof PolynomialFunction) {
+                    double[] coeffs = ((PolynomialFunction) exponent).getCoefficients();
+                    // konstantes Polynom genau dann, wenn length==1
+                    if (coeffs.length == 1) {
+                        expInt = (int) Math.round(coeffs[0]);
+                        if (negativeExp) {
+                            expInt = -expInt;
+                        }
+                    }
+                }
+
+                if (expInt != null) {
+                    // Exponent ist (±) konstante ganze Zahl
+                    int e = expInt;
+                    if (base instanceof PolynomialFunction && e >= 0) {
+                        // exakter Poly‐Fall für nonnegativen Integer
+                        base = PolynomialFunction.pow((PolynomialFunction) base, e);
+                    } else {
+                        // sonst numerisch: Math.pow(base(x), e)
+                        final int finalExp = e;
+                        Function oldBase = base;
+                        base = (double x) -> Math.pow(oldBase.evaluate(x), finalExp);
+                    }
                 } else {
-                    // sonst generisches Lambda: zur Laufzeit potenzieren
+                    // exponent ist kein konstantes integer → generalisiere zu Math.pow(base(x), exponent(x))
+                    Function signedExp;
+                    // negativeExp flag: falls true, ersetze exponent(x) durch -exponent(x)
+                    if (negativeExp) {
+                        Function oldExp = exponent;
+                        signedExp = (double x) -> -oldExp.evaluate(x);
+                    } else {
+                        signedExp = exponent;
+                    }
                     Function oldBase = base;
-                    base = (double x) -> Math.pow(oldBase.evaluate(x), exponent);
+                    base = (double x) -> {
+                        double b = oldBase.evaluate(x);
+                        double eVal = signedExp.evaluate(x);
+                        return Math.pow(b, eVal);
+                    };
                 }
             }
             return base;
         }
 
-        // Primary ->
-        //    trig_function | '(' Expression ')' | Zahl | 'x'
+        // Primary -> 'sin' '(' Expr ')'
+        //          | 'cos' '(' Expr ')'
+        //          | 'tan' '(' Expr ')'
+        //          | '(' Expr ')'
+        //          | Zahl
+        //          | 'x'
+        //          | 'e'
         public Function parsePrimary() {
             if (pos >= input.length()) {
                 throw new IllegalArgumentException("Unerwartetes Ende des Ausdrucks");
             }
-            // Prüfe auf trigonometrische Funktionen:
+
+            // 1) Trigonometrische Funktionen
             if (input.startsWith("sin", pos)) {
                 pos += 3;
                 expect('(');
@@ -131,57 +183,62 @@ public class FunctionParser {
                 expect(')');
                 return (double x) -> Math.sin(inner.evaluate(x));
             }
-            else if (input.startsWith("cos", pos)) {
+            if (input.startsWith("cos", pos)) {
                 pos += 3;
                 expect('(');
                 Function inner = parseExpression();
                 expect(')');
                 return (double x) -> Math.cos(inner.evaluate(x));
             }
-            else if (input.startsWith("tan", pos)) {
+            if (input.startsWith("tan", pos)) {
                 pos += 3;
                 expect('(');
                 Function inner = parseExpression();
                 expect(')');
                 return (double x) -> Math.tan(inner.evaluate(x));
             }
-            // Klammerausdruck
-            else if (input.charAt(pos) == '(') {
-                pos++; // '(' überspringen
+
+            // 2) Klammerausdruck
+            if (input.charAt(pos) == '(') {
+                pos++;
                 Function expr = parseExpression();
                 expect(')');
                 return expr;
             }
-            // Zahl (konstantes Polynom)
-            else if (Character.isDigit(input.charAt(pos)) || input.charAt(pos) == '.') {
+
+            // 3) Zahl (konstantes Polynom)
+            if (Character.isDigit(input.charAt(pos)) || input.charAt(pos) == '.') {
                 double num = parseNumber();
                 return new PolynomialFunction(num);
             }
-            // Variable x (Polynom „1·x + 0“)
-            else if (input.charAt(pos) == 'x' || input.charAt(pos) == 'X') {
+
+            // 4) Variable 'x'
+            if (input.charAt(pos) == 'x' || input.charAt(pos) == 'X') {
                 pos++;
-                return new PolynomialFunction(1, 0);
+                return new PolynomialFunction(1, 0); // f(x)=x
             }
 
-            throw new IllegalArgumentException("Unerwartetes Zeichen '" + input.charAt(pos) + "' an Position " + pos);
+            // 5) 'e' → Euler'sche Zahl als konstantes Polynom
+            if (input.charAt(pos) == 'e') {
+                pos++;
+                return new PolynomialFunction(Math.E);
+            }
+
+            throw new IllegalArgumentException("Unerwartetes Zeichen '" + input.charAt(pos)
+                    + "' an Position " + pos);
         }
 
-        /**
-         * Erwartet, dass an der aktuellen Position das Zeichen ch steht.
-         * Falls ja, wird die Position um eins erhöht, sonst wird eine Exception geworfen.
-         */
-        private void expect(char ch) {
-            if (pos >= input.length() || input.charAt(pos) != ch) {
-                throw new IllegalArgumentException("Erwartetes '" + ch + "' an Position " + pos);
+        private void expect(char c) {
+            if (pos >= input.length() || input.charAt(pos) != c) {
+                throw new IllegalArgumentException("Erwartetes '" + c + "' an Position " + pos);
             }
             pos++;
         }
 
-        // Liest eine Gleitkommazahl ein und gibt sie zurück.
         private double parseNumber() {
             int start = pos;
-            while (pos < input.length() &&
-                    (Character.isDigit(input.charAt(pos)) || input.charAt(pos) == '.')) {
+            while (pos < input.length()
+                    && (Character.isDigit(input.charAt(pos)) || input.charAt(pos) == '.')) {
                 pos++;
             }
             String token = input.substring(start, pos);
@@ -192,7 +249,6 @@ public class FunctionParser {
             }
         }
 
-        // Liest eine ganze Zahl ein.
         private int parseNumberInt() {
             int start = pos;
             while (pos < input.length() && Character.isDigit(input.charAt(pos))) {
@@ -202,7 +258,7 @@ public class FunctionParser {
             try {
                 return Integer.parseInt(token);
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Ungültige Zahl: " + token);
+                throw new IllegalArgumentException("Ungültige ganze Zahl: " + token);
             }
         }
     }

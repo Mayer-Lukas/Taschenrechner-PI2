@@ -146,4 +146,7 @@ public class PolynomialFunction implements Function {
         }
         return sb.isEmpty() ? "0" : sb.toString();
     }
+    public double[] getCoefficients() {
+        return coefficients.clone();
+    }
 }
