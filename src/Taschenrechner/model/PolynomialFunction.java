@@ -129,7 +129,7 @@ public class PolynomialFunction implements Function {
             double c = coefficients[i];
             int power = n - 1 - i;
             if (c == 0) continue;
-            if (sb.length() > 0) {
+            if (!sb.isEmpty()) {
                 sb.append(c > 0 ? " + " : " - ");
             } else if (c < 0) {
                 sb.append("-");
@@ -144,6 +144,6 @@ public class PolynomialFunction implements Function {
                 if (power > 1) sb.append("^").append(power);
             }
         }
-        return sb.length() == 0 ? "0" : sb.toString();
+        return sb.isEmpty() ? "0" : sb.toString();
     }
 }
