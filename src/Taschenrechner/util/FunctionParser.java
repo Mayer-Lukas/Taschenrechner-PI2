@@ -1,6 +1,7 @@
 package Taschenrechner.util;
 
 import Taschenrechner.model.Function;
+import Taschenrechner.model.PolynomialFunction;
 
 /**
  * Erweiterter FunctionParser, der nun auch trigonometrische Funktionen
@@ -59,19 +60,32 @@ public class FunctionParser {
                 if (ch == '+') {
                     pos++;
                     Function term = parseTerm();
-                    Function oldResult = result;
-                    result = (double x) -> oldResult.evaluate(x) + term.evaluate(x);
-                } else if (ch == '-') {
+
+                    if (result instanceof PolynomialFunction && term instanceof PolynomialFunction) {
+                        result = PolynomialFunction.add((PolynomialFunction) result, (PolynomialFunction) term);
+                    } else {
+                        Function oldResult = result;
+                        result = (double x) -> oldResult.evaluate(x) + term.evaluate(x);
+                    }
+                }
+                else if (ch == '-') {
                     pos++;
                     Function term = parseTerm();
-                    Function oldResult = result;
-                    result = (double x) -> oldResult.evaluate(x) - term.evaluate(x);
-                } else {
+
+                    if (result instanceof PolynomialFunction && term instanceof PolynomialFunction) {
+                        result = PolynomialFunction.subtract((PolynomialFunction) result, (PolynomialFunction) term);
+                    } else {
+                        Function oldResult = result;
+                        result = (double x) -> oldResult.evaluate(x) - term.evaluate(x);
+                    }
+                }
+                else {
                     break;
                 }
             }
             return result;
         }
+
 
         // Term -> Factor { '*' Factor }
         public Function parseTerm() {
@@ -79,8 +93,15 @@ public class FunctionParser {
             while (pos < input.length() && input.charAt(pos) == '*') {
                 pos++; // '*' überspringen
                 Function factor = parseFactor();
-                Function oldResult = result;
-                result = (double x) -> oldResult.evaluate(x) * factor.evaluate(x);
+
+                if (result instanceof PolynomialFunction && factor instanceof PolynomialFunction) {
+                    // beide Operanden sind Polynome -> echte polynomiale Multiplikation
+                    result = PolynomialFunction.multiply((PolynomialFunction) result, (PolynomialFunction) factor);
+                } else {
+                    // mindestens einer ist keine PolynomialFunction -> generisches Lambda
+                    Function oldResult = result;
+                    result = (double x) -> oldResult.evaluate(x) * factor.evaluate(x);
+                }
             }
             return result;
         }
@@ -91,8 +112,15 @@ public class FunctionParser {
             while (pos < input.length() && input.charAt(pos) == '^') {
                 pos++; // '^' überspringen
                 int exponent = parseNumberInt(); // Exponent als ganze Zahl
-                Function oldBase = base;
-                base = (double x) -> Math.pow(oldBase.evaluate(x), exponent);
+
+                // Wenn base schon ein PolynomialFunction ist, direkt pow verwenden:
+                if (base instanceof PolynomialFunction) {
+                    base = PolynomialFunction.pow((PolynomialFunction) base, exponent);
+                } else {
+                    // sonst generisches Lambda: (x) -> Math.pow(base.evaluate(x), exponent)
+                    Function oldBase = base;
+                    base = (double x) -> Math.pow(oldBase.evaluate(x), exponent);
+                }
             }
             return base;
         }
@@ -133,12 +161,12 @@ public class FunctionParser {
             // Zahl
             else if (Character.isDigit(input.charAt(pos)) || input.charAt(pos) == '.') {
                 double num = parseNumber();
-                return (double x) -> num;
+                return new PolynomialFunction(num);
             }
             // Variable x
             else if (input.charAt(pos) == 'x' || input.charAt(pos) == 'X') {
                 pos++; // 'x' verarbeiten
-                return (double x) -> x;
+                return new PolynomialFunction(1, 0);
             }
             throw new IllegalArgumentException("Unerwartetes Zeichen '" + input.charAt(pos) + "' an Position " + pos);
         }
