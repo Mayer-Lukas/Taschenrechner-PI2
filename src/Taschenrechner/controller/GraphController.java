@@ -20,7 +20,7 @@ public class GraphController {
     }
 
     private void initializeListeners() {
-        graphViewPanel.addPlotButtonListener(e -> {
+        graphViewPanel.addPlotButtonListener(_ -> {
             String input = graphViewPanel.getFunctionInput();
             try {
                 Function f = FunctionParser.parse(input);
@@ -36,7 +36,7 @@ public class GraphController {
         });
 
         // Option: Wenn der Benutzer das Kontrollkästchen ändert, aktualisiere die Anzeige (falls bereits ein Graph vorhanden ist)
-        graphViewPanel.addDerivativeCheckboxListener(e -> {
+        graphViewPanel.addDerivativeCheckboxListener(_ -> {
             if (graphModel != null) {
                 graphModel.setShowDerivative(graphViewPanel.isDerivativeSelected());
                 graphPanel.repaint();

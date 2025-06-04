@@ -1,8 +1,8 @@
 package Taschenrechner.model;
 
 public class GraphModel {
-    private Function function;
-    private Function derivative;
+    private final Function function;
+    private final Function derivative;
     private boolean showDerivative = false; // standardmäßig nicht anzeigen
 
     // Wertebereich (default)

@@ -1,7 +1,5 @@
 package Taschenrechner.model;
 
-import java.util.Arrays;
-
 public class PolynomialFunction implements Function {
     // coefficients[0] * x^(n-1) + coefficients[1] * x^(n-2) + ... + coefficients[n-1] * x^0
     private final double[] coefficients;

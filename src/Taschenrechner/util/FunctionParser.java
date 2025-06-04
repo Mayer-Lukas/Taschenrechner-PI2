@@ -3,16 +3,7 @@ package Taschenrechner.util;
 import Taschenrechner.model.Function;
 import Taschenrechner.model.PolynomialFunction;
 
-/**
- * Erweiterter FunctionParser, der nun auch trigonometrische Funktionen
- * unterstützt und implizite Multiplikation (z.B. x(x+1)(x-1)) korrekt einfügt.
- * Dieser Parser verarbeitet Ausdrücke der Form:
- *
- *   sin(x) + cos(2*x) - tan(x*(x+1))
- *
- * sowie polynomiale Teile, Zahlen, Variablen (x), Klammerausdrücke und
- * Operatoren (+, -, *, ^).
- */
+
 public class FunctionParser {
 
     public static Function parse(String expression) throws IllegalArgumentException {
