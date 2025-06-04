@@ -7,6 +7,7 @@ import java.awt.event.KeyEvent;
 import java.util.Objects;
 
 import Taschenrechner.controller.GraphController;
+import Taschenrechner.controller.MatrixController;
 import Taschenrechner.model.GraphModel;
 import Taschenrechner.model.PolynomialFunction;
 
@@ -60,8 +61,8 @@ public class MainFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        Color bgColor = UIManager.getColor("control");
-        Color sideBg = UIManager.getColor("nimbusBase");
+        Color bgColor   = UIManager.getColor("control");
+        Color sideBg    = UIManager.getColor("nimbusBase");
         Color textColor = UIManager.getColor("text");
 
         getContentPane().setBackground(bgColor);
@@ -75,8 +76,8 @@ public class MainFrame extends JFrame {
 
         // Erstelle drei Buttons für die Modi
         JButton btnCalculator = createSidebarButton("/Taschenrechner/assets/standard.png", sideBg);
-        JButton btnGraph = createSidebarButton("/Taschenrechner/assets/graph.png", sideBg);
-        JButton btnMatrix = createSidebarButton("/Taschenrechner/assets/matrix.png", sideBg);
+        JButton btnGraph      = createSidebarButton("/Taschenrechner/assets/graph.png",    sideBg);
+        JButton btnMatrix     = createSidebarButton("/Taschenrechner/assets/matrix.png",  sideBg);
 
         sidebar.add(Box.createVerticalStrut(10));
         sidebar.add(btnCalculator);
@@ -88,7 +89,7 @@ public class MainFrame extends JFrame {
 
         // CardPanel für den zentralen Bereich
         cardLayout = new CardLayout();
-        cardPanel = new JPanel(cardLayout);
+        cardPanel  = new JPanel(cardLayout);
         cardPanel.setBackground(bgColor);
 
         // --- Calculator Panel ---
@@ -100,7 +101,6 @@ public class MainFrame extends JFrame {
         buttonPanel = new ButtonPanel();
         buttonPanel.setBackground(bgColor);
 
-        // Panels für die einzelnen Modi
         JPanel calculatorPanel = new JPanel(new BorderLayout());
         calculatorPanel.setBackground(bgColor);
         calculatorPanel.add(displayPanel, BorderLayout.NORTH);
@@ -117,17 +117,14 @@ public class MainFrame extends JFrame {
         new GraphController(graphViewPanel, graphPanel);
 
         // --- Matrix Panel ---
-        JPanel matrixPanel = new JPanel(new BorderLayout());
+        MatrixPanel matrixPanel = new MatrixPanel();
         matrixPanel.setBackground(bgColor);
-        JLabel matrixLabel = new JLabel("Matrizenmodus (in Arbeit)", SwingConstants.CENTER);
-        matrixLabel.setForeground(textColor);
-        matrixLabel.setFont(new Font("Segoe UI", Font.PLAIN, 20));
-        matrixPanel.add(matrixLabel, BorderLayout.CENTER);
+        new MatrixController(matrixPanel);
 
         // Panels zum CardPanel hinzufügen
         cardPanel.add(calculatorPanel, "calculator");
-        cardPanel.add(graphViewPanel, "graph");
-        cardPanel.add(matrixPanel, "matrix");
+        cardPanel.add(graphViewPanel,   "graph");
+        cardPanel.add(matrixPanel,      "matrix");
 
         // Standardmäßig Calculator zeigen und Fenster passend setzen
         setSize(400, 600);
@@ -137,27 +134,24 @@ public class MainFrame extends JFrame {
         // Sidebar Button Aktionen
         btnCalculator.addActionListener((ActionEvent e) -> {
             cardLayout.show(cardPanel, "calculator");
-            // Größe für Rechner-Modus
             setSize(400, 600);
             setLocationRelativeTo(null);
         });
 
         btnGraph.addActionListener((ActionEvent e) -> {
             cardLayout.show(cardPanel, "graph");
-            // Größe für Graph-Modus
             setSize(800, 600);
             setLocationRelativeTo(null);
         });
 
         btnMatrix.addActionListener((ActionEvent e) -> {
             cardLayout.show(cardPanel, "matrix");
-            // Größe für Matrix-Modus (zwischen)
             setSize(600, 600);
             setLocationRelativeTo(null);
         });
 
         // Komponenten hinzufügen
-        add(sidebar, BorderLayout.WEST);
+        add(sidebar,  BorderLayout.WEST);
         add(cardPanel, BorderLayout.CENTER);
 
         setVisible(true);
