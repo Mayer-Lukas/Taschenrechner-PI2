@@ -18,7 +18,7 @@ public class MainFrame extends JFrame {
     private final CardLayout cardLayout;
 
     static {
-        // Nimbus Look & Feel aktivieren (Dark-Mode-Anpassung via UIManager)
+        // Nimbus Look & Feel aktivieren (Dark-Mode-Anpassung)
         try {
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -74,7 +74,7 @@ public class MainFrame extends JFrame {
         sidebar.setPreferredSize(new Dimension(60, 0));
         sidebar.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
 
-        // Erstelle drei Buttons für die Modi
+        // Drei Buttons für die Modi
         JButton btnCalculator = createSidebarButton("/Taschenrechner/assets/standard.png", sideBg);
         JButton btnGraph      = createSidebarButton("/Taschenrechner/assets/graph.png",    sideBg);
         JButton btnMatrix     = createSidebarButton("/Taschenrechner/assets/matrix.png",  sideBg);
@@ -87,7 +87,7 @@ public class MainFrame extends JFrame {
         sidebar.add(btnMatrix);
         sidebar.add(Box.createVerticalGlue());
 
-        // CardPanel für den zentralen Bereich
+        // CardPanel für zentralen Bereich
         cardLayout = new CardLayout();
         cardPanel  = new JPanel(cardLayout);
         cardPanel.setBackground(bgColor);
@@ -106,7 +106,6 @@ public class MainFrame extends JFrame {
         calculatorPanel.add(displayPanel, BorderLayout.NORTH);
         calculatorPanel.add(buttonPanel, BorderLayout.CENTER);
 
-        // Tastatur-Interaktion konfigurieren
         registerKeyBindings();
 
         // --- Graph View Panel ---
@@ -121,36 +120,33 @@ public class MainFrame extends JFrame {
         matrixPanel.setBackground(bgColor);
         new MatrixController(matrixPanel);
 
-        // Panels zum CardPanel hinzufügen
+        // Panels ins CardPanel einfügen
         cardPanel.add(calculatorPanel, "calculator");
         cardPanel.add(graphViewPanel,   "graph");
         cardPanel.add(matrixPanel,      "matrix");
 
-        // Standardmäßig Calculator zeigen und Fenster passend setzen
+        // Standardmäßig Rechner anzeigen
         setSize(400, 600);
         setLocationRelativeTo(null);
         cardLayout.show(cardPanel, "calculator");
 
-        // Sidebar Button Aktionen
+        // Sidebar-Buttons Aktionen
         btnCalculator.addActionListener((ActionEvent e) -> {
             cardLayout.show(cardPanel, "calculator");
             setSize(400, 600);
             setLocationRelativeTo(null);
         });
-
         btnGraph.addActionListener((ActionEvent e) -> {
             cardLayout.show(cardPanel, "graph");
             setSize(800, 600);
             setLocationRelativeTo(null);
         });
-
         btnMatrix.addActionListener((ActionEvent e) -> {
             cardLayout.show(cardPanel, "matrix");
             setSize(600, 600);
             setLocationRelativeTo(null);
         });
 
-        // Komponenten hinzufügen
         add(sidebar,  BorderLayout.WEST);
         add(cardPanel, BorderLayout.CENTER);
 

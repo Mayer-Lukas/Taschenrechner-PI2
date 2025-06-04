@@ -73,7 +73,7 @@ public class Matrix {
         double[][] mat1 = this.getData();
         double[][] mat2 = m2.getData();
         double[][] d = new double[this.getRows()][this.getCols()];
-        Matrix result = new Matrix(this.getRows(), this.getCols(), d);
+        Matrix result = new Matrix(this.getRows(), m2.getCols(), d);
         for(int i=0; i<this.getRows(); i++){
             for(int j=0; j<m2.getCols(); j++){
                 double sum = 0;
