@@ -11,11 +11,16 @@ public class GraphModel {
 
     public GraphModel(Function function) {
         this.function = function;
-        // Ableitung berechnen (sofern als PolynomialFunction implementiert)
+
         if (function instanceof PolynomialFunction) {
+            // exakte polynomiale Ableitung
             derivative = ((PolynomialFunction) function).derivative();
         } else {
-            derivative = null;
+            // numerische Ableitung für alle anderen (z.B. Trig-Lambdas, Kombinationen, …)
+            derivative = (double x) -> {
+                double h = 1e-5; // oder 1e-6, je nach gewünschter Genauigkeit
+                return (function.evaluate(x + h) - function.evaluate(x - h)) / (2 * h);
+            };
         }
     }
 
