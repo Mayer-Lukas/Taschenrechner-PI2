@@ -117,6 +117,7 @@ public class Matrix {
     }
 }
 
+/*
 class Main {
     public static void main(String[] args) {
         double[][] data1 = {
@@ -149,3 +150,5 @@ class Main {
         m1.transpose().printMatrix();
     }
 }
+
+ */
