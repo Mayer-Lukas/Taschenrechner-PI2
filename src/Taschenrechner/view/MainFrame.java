@@ -59,6 +59,11 @@ public class MainFrame extends JFrame {
 
     public MainFrame() {
         setTitle("Taschenrechner");
+        Image icon = new ImageIcon(Objects.requireNonNull(
+                getClass().getResource("/Taschenrechner/assets/app_icon.png")
+        )).getImage();
+        setIconImage(icon);
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
