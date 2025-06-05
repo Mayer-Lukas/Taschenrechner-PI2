@@ -6,13 +6,13 @@ import Taschenrechner.model.Complex;
  * Ein einfacher recursive‐descent‐Parser für komplexe Ausdrücke.
  * Unterstützt:
  *   - Literale:    a+bi, a-bi, 3i, -2i, 5        (ohne Leerzeichen oder mit Leerzeichen)
- *   - Klammerausdrücke: ( … )
+ *   - Klammerausdrücke: (… )
  *   - Operatoren:  +, -, *, /
  *   - Funktionen:  conj(z), abs(z)
- *
+ * <p>
  * Beispiele:
- *   ComplexParser.parse("3+4i")
- *   ComplexParser.parse("(1-2i)*(3+5i)")
+ *   ComplexParser.parse("3 + 4i")
+ *   ComplexParser.parse("(1-2i)*(3 + 5i)")
  *   ComplexParser.parse("conj(2-3i) + abs(3-4i)")
  */
 public class ComplexParser {
@@ -130,7 +130,7 @@ public class ComplexParser {
      *   - a+bi  (z.B. "3+4i", "2-5i")
      *   - bi    (z.B. "3i", "-2i", "+i")
      *   - a     (reine reelle Zahl, z.B. "5", "-3.2")
-     *
+     * <p>
      * Liefert ein Complex-Objekt oder null, wenn kein Literal passt.
      */
     private Complex parseComplexLiteral() {
@@ -139,7 +139,6 @@ public class ComplexParser {
         // 1) Lese optionales Vorzeichen
         boolean neg = false;
         if (match('+')) {
-            neg = false;
         } else if (match('-')) {
             neg = true;
         }
@@ -170,7 +169,7 @@ public class ComplexParser {
             double imag = (realPart != null ? realPart : 1.0);
             // Fall „i“ bzw. „-i“: realPart == null, neg == false→1i;
             // wenn vorzeichen war, dann realPart erst Null, neg==true, dann imag = 1, mit negativ?
-            if (neg && realPart == null) {
+            if (neg) {
                 imag = -1.0;
             }
             return new Complex(0.0, imag);
@@ -210,7 +209,7 @@ public class ComplexParser {
         // Lese '+' oder '-'
         boolean plus = false, minus = false;
         if (pos < input.length() && input.charAt(pos) == '+') {
-            plus = true; pos++;
+            pos++;
         } else if (pos < input.length() && input.charAt(pos) == '-') {
             minus = true; pos++;
         } else {
