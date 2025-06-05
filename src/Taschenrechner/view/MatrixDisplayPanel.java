@@ -1,7 +1,7 @@
 package Taschenrechner.view;
 
 import javax.swing.*;
-import java.awt.*;
+
 import org.scilab.forge.jlatexmath.TeXFormula;
 import org.scilab.forge.jlatexmath.TeXIcon;
 
