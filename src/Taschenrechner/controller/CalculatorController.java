@@ -3,12 +3,21 @@ package Taschenrechner.controller;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
+import java.util.Objects;
+
+import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 
 import Taschenrechner.model.Expression;
 import Taschenrechner.util.ExpressionParser;
 import Taschenrechner.view.DisplayPanel;
 import Taschenrechner.view.ButtonPanel;
 
+/**
+ * Controller für den Standard‐Taschenrechner.
+ * Reagiert auf Button‐Klicks, baut den Ausdruck auf, parst und wertet ihn aus.
+ * Fängt Division‐durch‐Null ab und zeigt stattdessen ein Bild‐Popup.
+ */
 public class CalculatorController implements ActionListener {
     private final DisplayPanel display;
     private final ExpressionParser parser;
@@ -33,7 +42,7 @@ public class CalculatorController implements ActionListener {
 
             case "CE":
                 // Letztes Zeichen löschen
-                if (!currentInput.isEmpty()) {
+                if (currentInput.length() > 0) {
                     currentInput.deleteCharAt(currentInput.length() - 1);
                     display.setText(currentInput.toString());
                 }
@@ -45,10 +54,15 @@ public class CalculatorController implements ActionListener {
                     Expression expr = parser.parse(currentInput.toString());
                     double result = expr.evaluate();
                     display.setText(Double.toString(result));
-                    // Optional: Ergebnis als neuer Input
+                    // Ergebnis als neuer Input verwenden
                     currentInput.setLength(0);
                     currentInput.append(result);
-                } catch (ParseException | ArithmeticException ex) {
+                } catch (ArithmeticException ae) {
+                    // Division durch Null abgefangen → Bild‐Popup
+                    showDivideByZeroPopup();
+                    currentInput.setLength(0);
+                } catch (ParseException pe) {
+                    // Syntax‐Fehler
                     display.setText("Fehler");
                     currentInput.setLength(0);
                 }
@@ -95,5 +109,37 @@ public class CalculatorController implements ActionListener {
                 currentInput.append(cmd);
                 display.setText(currentInput.toString());
         }
+    }
+
+    /**
+     * Zeigt ein Popup‐Dialogfenster mit dem Bild "div0.png", wenn durch 0 geteilt wurde.
+     */
+    private void showDivideByZeroPopup() {
+        ImageIcon icon;
+        try {
+            icon = new ImageIcon(
+                    Objects.requireNonNull(
+                            getClass().getResource("/Taschenrechner/assets/div0.png")
+                    )
+            );
+        } catch (Exception e) {
+            // Falls das Bild nicht gefunden wird, zumindest eine Text‐Warnung
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Bild 'div0.png' nicht gefunden!",
+                    "Fehler",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        // Zeige das Bild ohne zusätzlichen Text
+        JOptionPane.showMessageDialog(
+                null,
+                "",
+                "Division durch Null",
+                JOptionPane.INFORMATION_MESSAGE,
+                icon
+        );
     }
 }
