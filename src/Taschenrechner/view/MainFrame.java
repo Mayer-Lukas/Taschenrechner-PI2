@@ -120,6 +120,7 @@ public class MainFrame extends JFrame {
         displayPanel.setBackground(bgColor);
         displayPanel.setForeground(textColor);
         displayPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        displayPanel.setFocusable(true);
 
         buttonPanel = new ButtonPanel();
         buttonPanel.setBackground(bgColor);
@@ -162,6 +163,16 @@ public class MainFrame extends JFrame {
         cardLayout.show(cardPanel, "calculator");
         setSize(400, 600);
         setLocationRelativeTo(null);
+
+        addWindowFocusListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowGainedFocus(java.awt.event.WindowEvent e) {
+                // Sobald das Fenster den Fokus erhält (z.B. nach Schließen des Bilder-Popups),
+                // holen wir uns den Fokus zurück auf das DisplayPanel:
+                displayPanel.requestFocusInWindow();
+            }
+        });
+
         setVisible(true);
 
         // 7) Aktionen für Sidebar-Buttons
