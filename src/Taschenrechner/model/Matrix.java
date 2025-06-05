@@ -1,7 +1,5 @@
 package Taschenrechner.model;
 
-import java.util.Arrays;
-
 public class Matrix {
     private final double[][] data;
     private final int rows;
@@ -117,38 +115,3 @@ public class Matrix {
     }
 }
 
-/*
-class Main {
-    public static void main(String[] args) {
-        double[][] data1 = {
-                { 0, 1,  1,  4 },
-                { 2, 4, -2,  2 },
-                { 0, 3, 15, 36 }
-        };
-        double[][] data2 = {
-                {7, 8, 9, 2},
-                {10, 11, 12, 4},
-                {13, 14, 15, 3}
-        };
-
-        Matrix m1 = new Matrix(3, 4, data1);
-        Matrix m2 = new Matrix(3, 4, data2);
-
-        Matrix sum = m1.add(m2);
-        System.out.println("Summe:");
-        sum.printMatrix();
-
-        Matrix diff = m1.sub(m2);
-        System.out.println("Differenz:");
-        diff.printMatrix();
-        System.out.println("Zeilen-Stufen-Form:");
-        Matrix rowEchelon = m1.rowEchelonForm();
-        rowEchelon.printMatrix();
-        System.out.println("Lösung:");
-        System.out.println(Arrays.toString(m1.solve()));
-        System.out.println("Transponierte Matrix:");
-        m1.transpose().printMatrix();
-    }
-}
-
- */

@@ -11,15 +11,13 @@ import Taschenrechner.view.ButtonPanel;
 
 public class CalculatorController implements ActionListener {
     private final DisplayPanel display;
-    private final ButtonPanel buttons;
     private final ExpressionParser parser;
     private final StringBuilder currentInput = new StringBuilder();
 
     public CalculatorController(DisplayPanel display, ButtonPanel buttons) {
         this.display = display;
-        this.buttons = buttons;
         this.parser = new ExpressionParser();
-        this.buttons.addButtonListener(this);
+        buttons.addButtonListener(this);
     }
 
     @Override
@@ -35,7 +33,7 @@ public class CalculatorController implements ActionListener {
 
             case "CE":
                 // Letztes Zeichen löschen
-                if (currentInput.length() > 0) {
+                if (!currentInput.isEmpty()) {
                     currentInput.deleteCharAt(currentInput.length() - 1);
                     display.setText(currentInput.toString());
                 }

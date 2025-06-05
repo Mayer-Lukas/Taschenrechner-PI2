@@ -3,14 +3,16 @@ package Taschenrechner.util;
 import Taschenrechner.model.Function;
 import Taschenrechner.model.PolynomialFunction;
 
+/**
+ * FunctionParser verbessert, damit '-x^2' korrekt als '-(x^2)' und nicht als '(-x)^2' ausgewertet wird.
+ */
 public class FunctionParser {
 
     public static Function parse(String expression) throws IllegalArgumentException {
         if (expression == null || expression.isEmpty()) {
             throw new IllegalArgumentException("Leerer Ausdruck");
         }
-        // Leerzeichen entfernen und implizite Multiplikation einfügen, wenn vor "("
-        // eine Ziffer, ein 'x'/'X' oder ')' steht
+        // Leerzeichen entfernen und implizite Multiplikation einfügen
         expression = expression.replaceAll("\\s+", "");
         expression = expression.replaceAll("(?<=[0-9xX)])\\(", "*(");
 
@@ -63,24 +65,24 @@ public class FunctionParser {
             return result;
         }
 
-        // Term -> Factor { ('*' | '/') Factor }
-        public Function parseTerm() {
-            Function result = parseFactor();
+        // Term -> Unary { ('*' | '/') Unary }
+        private Function parseTerm() {
+            Function result = parseUnary();
             while (pos < input.length()) {
                 char op = input.charAt(pos);
                 if (op == '*' || op == '/') {
                     pos++;
-                    Function factor = parseFactor();
+                    Function right = parseUnary();
                     if (op == '*') {
-                        if (result instanceof PolynomialFunction && factor instanceof PolynomialFunction) {
-                            result = PolynomialFunction.multiply((PolynomialFunction) result, (PolynomialFunction) factor);
+                        if (result instanceof PolynomialFunction && right instanceof PolynomialFunction) {
+                            result = PolynomialFunction.multiply((PolynomialFunction) result, (PolynomialFunction) right);
                         } else {
                             Function old = result;
-                            result = (double x) -> old.evaluate(x) * factor.evaluate(x);
+                            result = (double x) -> old.evaluate(x) * right.evaluate(x);
                         }
                     } else {
                         Function old = result;
-                        result = (double x) -> old.evaluate(x) / factor.evaluate(x);
+                        result = (double x) -> old.evaluate(x) / right.evaluate(x);
                     }
                 } else {
                     break;
@@ -89,46 +91,45 @@ public class FunctionParser {
             return result;
         }
 
-        // Factor -> Primary [ '^' Factor ]
-        public Function parseFactor() {
-            Function base = parsePrimary();
+        // Unary -> ('+' | '-') Unary | Power
+        private Function parseUnary() {
+            if (pos < input.length() && input.charAt(pos) == '+') {
+                pos++;
+                return parseUnary();
+            }
+            if (pos < input.length() && input.charAt(pos) == '-') {
+                pos++;
+                Function inner = parseUnary();
+                return (double x) -> -inner.evaluate(x);
+            }
+            return parsePower();
+        }
 
+        // Power -> Primary [ '^' Unary ]
+        private Function parsePower() {
+            Function base = parsePrimary();
             while (pos < input.length() && input.charAt(pos) == '^') {
                 pos++; // '^' überspringen
-
-                Function exponent;
-                // Wenn geschweifte Klammer folgt → gruppierten Ausdruck parsen
-                if (pos < input.length() && input.charAt(pos) == '{') {
-                    pos++; // '{' überspringen
-                    exponent = parseExpression();
-                    expect('}'); // geschlossene '}'
-                } else if (Character.isDigit(input.charAt(pos))) {
-                    int exponentValue = parseNumberInt();
-                    exponent = new PolynomialFunction(exponentValue);
-                } else if (input.charAt(pos) == '(') {
-                    pos++; // '(' überspringen
-                    exponent = parseExpression();
-                    expect(')');
-                } else {
-                    throw new IllegalArgumentException("Erwarteter Exponent nach '^' an Position " + pos);
-                }
-
+                Function exponent = parseUnary();
                 Function oldBase = base;
                 base = (double x) -> Math.pow(oldBase.evaluate(x), exponent.evaluate(x));
             }
-
             return base;
         }
 
-
-        // Primary ->
-        //   'ln' '(' Expr ')'
+        // Primary →
+        //   'sqrt' '(' Expr ')'
+        // | 'ln' '(' Expr ')'
         // | 'lg' '(' Expr ')'
         // | 'log' '(' Expr ')'
         // | 'sin' '(' Expr ')'
         // | 'cos' '(' Expr ')'
         // | 'tan' '(' Expr ')'
+        // | 'arcsin' '(' Expr ')'
+        // | 'arccos' '(' Expr ')'
+        // | 'arctan' '(' Expr ')'
         // | '(' Expr ')'
+        // | '{' Expr '}'
         // | Zahl
         // | 'x'
         // | 'e'
@@ -136,119 +137,112 @@ public class FunctionParser {
             if (pos >= input.length()) {
                 throw new IllegalArgumentException("Unerwartetes Ende des Ausdrucks");
             }
-            // === sqrt(x) → Quadratwurzel ===
+
+            // sqrt(x)
             if (input.startsWith("sqrt", pos)) {
                 pos += 4; expect('(');
                 Function inner = parseExpression();
                 expect(')');
                 return (double x) -> Math.sqrt(inner.evaluate(x));
             }
-            // === ln(x) → natürlicher Log (Basis e) ===
+            // ln(x)
             if (input.startsWith("ln", pos)
                     && pos + 2 < input.length()
-                    && input.charAt(pos + 2) == '(')
-            {
-                pos += 2; // überspringe "ln"
-                expect('(');
+                    && input.charAt(pos + 2) == '(') {
+                pos += 2; expect('(');
                 Function inner = parseExpression();
                 expect(')');
                 return (double x) -> Math.log(inner.evaluate(x));
             }
-
-            // === lg(x) → Logarithmus Basis 2 ===
+            // lg(x)
             if (input.startsWith("lg", pos)
                     && pos + 2 < input.length()
-                    && input.charAt(pos + 2) == '(')
-            {
-                pos += 2; // überspringe "lg"
-                expect('(');
+                    && input.charAt(pos + 2) == '(') {
+                pos += 2; expect('(');
                 Function inner = parseExpression();
                 expect(')');
                 return (double x) -> Math.log(inner.evaluate(x)) / Math.log(2);
             }
-
-            // === log(x) → Logarithmus Basis 10 ===
+            // log(x)
             if (input.startsWith("log", pos)
                     && pos + 3 < input.length()
-                    && input.charAt(pos + 3) == '(')
-            {
-                pos += 3; // überspringe "log"
-                expect('(');
+                    && input.charAt(pos + 3) == '(') {
+                pos += 3; expect('(');
                 Function inner = parseExpression();
                 expect(')');
                 return (double x) -> Math.log10(inner.evaluate(x));
             }
-
-            // === sin(x) ===
+            // sin(x)
             if (input.startsWith("sin", pos)) {
-                pos += 3;
-                expect('(');
+                pos += 3; expect('(');
                 Function inner = parseExpression();
                 expect(')');
                 return (double x) -> Math.sin(inner.evaluate(x));
             }
-            // === cos(x) ===
+            // cos(x)
             if (input.startsWith("cos", pos)) {
-                pos += 3;
-                expect('(');
+                pos += 3; expect('(');
                 Function inner = parseExpression();
                 expect(')');
                 return (double x) -> Math.cos(inner.evaluate(x));
             }
-            // === tan(x) ===
+            // tan(x)
             if (input.startsWith("tan", pos)) {
-                pos += 3;
-                expect('(');
+                pos += 3; expect('(');
                 Function inner = parseExpression();
                 expect(')');
                 return (double x) -> Math.tan(inner.evaluate(x));
             }
-            // === arcsin(x), arccos(x), arctan(x) ===
+            // arcsin(x)
             if (input.startsWith("arcsin", pos)) {
                 pos += 6; expect('(');
                 Function inner = parseExpression();
                 expect(')');
                 return (double x) -> Math.asin(inner.evaluate(x));
             }
+            // arccos(x)
             if (input.startsWith("arccos", pos)) {
                 pos += 6; expect('(');
                 Function inner = parseExpression();
                 expect(')');
                 return (double x) -> Math.acos(inner.evaluate(x));
             }
+            // arctan(x)
             if (input.startsWith("arctan", pos)) {
                 pos += 6; expect('(');
                 Function inner = parseExpression();
                 expect(')');
                 return (double x) -> Math.atan(inner.evaluate(x));
             }
-            // === Klammerausdruck ===
+
+            // Klammerausdruck rund
             if (input.charAt(pos) == '(') {
                 pos++;
                 Function expr = parseExpression();
                 expect(')');
                 return expr;
             }
-            else if (input.charAt(pos) == '{') {
-                pos++; // '{' überspringen
+            // Klammerausdruck geschweift
+            if (input.charAt(pos) == '{') {
+                pos++;
                 Function expr = parseExpression();
                 expect('}');
                 return expr;
             }
 
-            // === Zahl (konstantes Polynom) ===
+            // Zahl (konstantes Polynom)
             if (Character.isDigit(input.charAt(pos)) || input.charAt(pos) == '.') {
                 double num = parseNumber();
                 return new PolynomialFunction(num);
             }
 
-            // === Variable 'x' ===
+            // Variable 'x'
             if (input.charAt(pos) == 'x' || input.charAt(pos) == 'X') {
                 pos++;
                 return new PolynomialFunction(1, 0);
             }
 
-            // === 'e' → Euler’sche Zahl ===
+            // Euler'sche Zahl 'e'
             if (input.charAt(pos) == 'e') {
                 pos++;
                 return new PolynomialFunction(Math.E);
