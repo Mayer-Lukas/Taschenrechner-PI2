@@ -53,7 +53,7 @@ public class GaussianSolver {
 
     /**
      * Löst das Gleichungssystem Ax = b mittels Gauß-Algorithmus mit partieller Pivotisierung.
-     * Dabei wird zuerst Vorwärtselfimination durchgeführt, anschließend Rückwärtseinsetzen.
+     * Dabei wird zuerst Vorwärtselimination durchgeführt, anschließend Rückwärtseinsetzen.
      *
      * @return double[] x mit Länge n, die eindeutige Lösung des Systems
      * @throws ArithmeticException falls die Matrix singulär oder nahe singulär ist
@@ -64,7 +64,7 @@ public class GaussianSolver {
         for (int i = 0; i < n; i++) {
             System.arraycopy(aug[i], 0, mat[i], 0, n + 1);
         }
-        // Vorwärtselfimination
+        // Vorwärtselimination
         forwardElimination(mat);
 
         // Rückwärtseinsetzen
@@ -83,7 +83,7 @@ public class GaussianSolver {
     }
 
     /**
-     * Führt Vorwärtselfimination auf der augmentierten Matrix mat durch.
+     * Führt Vorwärtselimination auf der augmentierten Matrix mat durch.
      * Am Ende ist mat in Zeilen-Stufen-Form (Row Echelon Form).
      *
      * @param mat augmentierte Matrix (n x (n+1)), wird in-place umgeformt
