@@ -194,14 +194,12 @@ public class ExpressionParser {
      * ^ → 4, * und / → 3, + und - → 2, alles andere → 0.
      */
     private int precedence(String op) {
-        switch (op) {
-            case "^": return 4;
-            case "*":
-            case "/": return 3;
-            case "+":
-            case "-": return 2;
-            default:    return 0;
-        }
+        return switch (op) {
+            case "^" -> 4;
+            case "*", "/" -> 3;
+            case "+", "-" -> 2;
+            default -> 0;
+        };
     }
 
     /**
