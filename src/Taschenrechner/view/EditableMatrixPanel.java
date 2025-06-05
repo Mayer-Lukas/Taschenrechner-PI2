@@ -1,7 +1,6 @@
 package Taschenrechner.view;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 
@@ -14,11 +13,8 @@ import java.awt.*;
 public class EditableMatrixPanel extends JPanel {
     private final JSpinner spinnerRows;
     private final JSpinner spinnerCols;
-    private JPanel gridPanel;          // Container für die TextFields
+    private final JPanel gridPanel;          // Container für die TextFields
     private JTextField[][] fields;     // Die eigentlichen Eingabefelder
-
-    private final int MIN_SIZE = 1;
-    private final int MAX_SIZE = 20;
 
     // Mindestgröße, damit die Spinner immer sichtbar bleiben
     private final Dimension MINIMUM_DIMENSION = new Dimension(250, 150);
@@ -31,6 +27,8 @@ public class EditableMatrixPanel extends JPanel {
         JPanel dimensionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
         dimensionPanel.setOpaque(false);
         dimensionPanel.add(new JLabel("Zeilen:"));
+        int MIN_SIZE = 1;
+        int MAX_SIZE = 20;
         spinnerRows = new JSpinner(new SpinnerNumberModel(initialRows, MIN_SIZE, MAX_SIZE, 1));
         dimensionPanel.add(spinnerRows);
         dimensionPanel.add(new JLabel("Spalten:"));
@@ -45,12 +43,7 @@ public class EditableMatrixPanel extends JPanel {
         add(gridPanel, BorderLayout.CENTER);
 
         // Reagiere auf Änderung der Spinner
-        ChangeListener sizeListener = new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                rebuildGrid();
-            }
-        };
+        ChangeListener sizeListener = e -> rebuildGrid();
         spinnerRows.addChangeListener(sizeListener);
         spinnerCols.addChangeListener(sizeListener);
 

@@ -11,12 +11,11 @@ import java.awt.*;
  * - Literale: a+bi, a-bi, 3i, -2i, 5
  * - Operatoren: +, -, *, /
  * - Funktionen: conj(z), abs(z)
- *
+ * <p>
  * Ergebnis wird immer mit drei Nachkommastellen formatiert, z.B. "4,000" statt "4".
  */
 public class ComplexPanel extends JPanel {
     private final JTextField inputField;
-    private final JButton calcButton;
     private final JTextArea outputArea;
 
     public ComplexPanel() {
@@ -31,7 +30,7 @@ public class ComplexPanel extends JPanel {
         label.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         inputField = new JTextField(25);
         inputField.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        calcButton = new JButton("Berechnen");
+        JButton calcButton = new JButton("Berechnen");
         calcButton.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         topPanel.add(label);
         topPanel.add(inputField);
@@ -67,24 +66,24 @@ public class ComplexPanel extends JPanel {
         }
         try {
             Complex z = ComplexParser.parse(text);
-            StringBuilder sb = new StringBuilder();
 
-            // Karte­sische Darstellung (immer 3 Nachkommastellen)
-            sb.append("Ergebnis (kartesisch):\n  ")
-                    .append(formatComplex(z))
-                    .append("\n\n");
+            // Kartesische Darstellung (immer 3 Nachkommastellen)
 
-            // Betrag |z| als reelle Zahl mit 3 Nachkommastellen
-            sb.append("Betrag |z|:    ")
-                    .append(String.format("%.3f", z.abs()))
-                    .append("\n");
+            String sb = "Ergebnis (kartesisch):\n  " +
+                    formatComplex(z) +
+                    "\n\n" +
 
-            // Konjugierte
-            sb.append("Konjugierte:   ")
-                    .append(formatComplex(z.conj()))
-                    .append("\n");
+                    // Betrag |z| als reelle Zahl mit 3 Nachkommastellen
+                    "Betrag |z|:    " +
+                    String.format("%.3f", z.abs()) +
+                    "\n" +
 
-            outputArea.setText(sb.toString());
+                    // Konjugierte
+                    "Konjugierte:   " +
+                    formatComplex(z.conj()) +
+                    "\n";
+
+            outputArea.setText(sb);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this,
                     "Ungültiger Ausdruck: " + ex.getMessage(),
