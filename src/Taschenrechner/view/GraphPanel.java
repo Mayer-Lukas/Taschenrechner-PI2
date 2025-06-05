@@ -9,12 +9,13 @@ import Taschenrechner.model.GraphModel;
 
 /**
  * Moderner GraphPanel mit Zoom (Mausrad), transparenten Gitterlinien, dynamischer Skalierung
- * und lokalem Flag für das Anzeigen der Ableitung.
+ * und lokalem Flag für das Anzeigen der Ableitung. Zusätzliche Easter‐Egg‐Funktion.
  */
 public class GraphPanel extends JPanel {
     private GraphModel graphModel;
     private double xMin, xMax, yMin, yMax;
     private boolean showDerivativeFlag = false; // lokal gesteuert durch Checkbox
+    private boolean showEasterEgg = false;      // Easter‐Egg‐Flag
 
     private static final double ZOOM_FACTOR = 1.2;
 
@@ -34,6 +35,12 @@ public class GraphPanel extends JPanel {
 
     public void setShowDerivative(boolean flag) {
         this.showDerivativeFlag = flag;
+        repaint();
+    }
+
+    /** Setter für den Easter‐Egg‐Modus */
+    public void setShowEasterEgg(boolean show) {
+        this.showEasterEgg = show;
         repaint();
     }
 
@@ -62,14 +69,45 @@ public class GraphPanel extends JPanel {
         g2.setColor(getBackground());
         g2.fillRect(0, 0, w, h);
 
+        // 1) Gitter & Achsen zeichnen
         drawGridAndAxes(g2, w, h);
 
+        // 2) Easter‐Egg? Falls ja, Texte unten rechts und ggf. oben links malen, dann return
+        if (showEasterEgg) {
+            String eggText = "PI2";
+            String profText = "Professor Lensch";
+            int margin = 20;
+
+            // --- PI2 unten rechts ---
+            g2.setColor(new Color(68, 175, 240));
+            g2.setFont(new Font("Segoe UI", Font.PLAIN, 48));
+            FontMetrics fmEgg = g2.getFontMetrics();
+            int eggWidth  = fmEgg.stringWidth(eggText);
+            int eggAscent = fmEgg.getAscent();
+            int eggX = w - margin - eggWidth;
+            int eggY = h - margin;
+            g2.drawString(eggText, eggX, eggY);
+
+            // --- Professor Lensch oben links, nur wenn Ableitung angezeigt wird ---
+            if (showDerivativeFlag) {
+                g2.setColor(new Color(240, 65, 65));
+                g2.setFont(new Font("Segoe UI", Font.PLAIN, 24));
+                FontMetrics fmProf = g2.getFontMetrics();
+                int profAscent = fmProf.getAscent();
+                int profX = margin;
+                int profY = margin + profAscent;
+                g2.drawString(profText, profX, profY);
+            }
+            return;
+        }
+
+        // 3) Funktion plotten (Standardfarbe) und evtl. Ableitung
         g2.setStroke(new BasicStroke(2f));
-        g2.setColor(new Color(68, 175, 240));
+        g2.setColor(new Color(68, 175, 240)); // Hellblau
         plotFunction(g2, graphModel.getFunction(), w, h);
 
         if (showDerivativeFlag && graphModel.getDerivative() != null) {
-            g2.setColor(new Color(240, 65, 65));
+            g2.setColor(new Color(240, 65, 65)); // Rot für Ableitung
             plotFunction(g2, graphModel.getDerivative(), w, h);
         }
     }
@@ -85,17 +123,20 @@ public class GraphPanel extends JPanel {
         double xStep = niceStep(xRange / 10.0);
         double yStep = niceStep(yRange / 10.0);
 
+        // Vertikale Gitterlinien
         for (double x = Math.ceil(xMin / xStep) * xStep; x <= xMax; x += xStep) {
             int px = mapX(x, w);
             g2.setColor(gridColor);
             g2.drawLine(px, 0, px, h);
         }
+        // Horizontale Gitterlinien
         for (double y = Math.ceil(yMin / yStep) * yStep; y <= yMax; y += yStep) {
             int py = mapY(y, h);
             g2.setColor(gridColor);
             g2.drawLine(0, py, w, py);
         }
 
+        // Achsen
         int xAxisPx = mapY(0, h);
         int yAxisPx = mapX(0, w);
         g2.setColor(axisColor);
@@ -103,16 +144,19 @@ public class GraphPanel extends JPanel {
         g2.draw(new Line2D.Double(0, xAxisPx, w, xAxisPx));
         g2.draw(new Line2D.Double(yAxisPx, 0, yAxisPx, h));
 
+        // Pfeilspitzen
         int arrowSize = 6;
         g2.draw(new Line2D.Double(w - arrowSize, xAxisPx - arrowSize, w, xAxisPx));
         g2.draw(new Line2D.Double(w - arrowSize, xAxisPx + arrowSize, w, xAxisPx));
         g2.draw(new Line2D.Double(yAxisPx - arrowSize, arrowSize, yAxisPx, 0));
         g2.draw(new Line2D.Double(yAxisPx + arrowSize, arrowSize, yAxisPx, 0));
 
+        // Achsenbeschriftungen „x“ und „y“
         g2.setColor(labelColor);
         g2.drawString("x", w - 15, xAxisPx - 10);
         g2.drawString("y", yAxisPx + 10, 15);
 
+        // Zahlenbeschriftungen unten (x) und links (y)
         for (double x = Math.ceil(xMin / xStep) * xStep; x <= xMax; x += xStep) {
             int px = mapX(x, w);
             int py = xAxisPx;
@@ -157,7 +201,7 @@ public class GraphPanel extends JPanel {
         for (int i = 0; i < w; i++) {
             double x = xMin + i * (xMax - xMin) / (w - 1);
             double y = func.evaluate(x);
-            int px = i;
+            int px = mapX(x, w);
             int py = mapY(y, h);
 
             if (!first && !Double.isNaN(prevY) && !Double.isNaN(py)) {

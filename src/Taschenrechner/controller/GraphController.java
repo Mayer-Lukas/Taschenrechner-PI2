@@ -20,8 +20,20 @@ public class GraphController {
     }
 
     private void initializeListeners() {
-        graphViewPanel.addPlotButtonListener(_ -> {
-            String input = graphViewPanel.getFunctionInput();
+        graphViewPanel.addPlotButtonListener(_event -> {
+            String input = graphViewPanel.getFunctionInput().trim();
+
+            // 1) Check auf Easter‐Egg‐Schlüsselwort
+            if (input.equalsIgnoreCase("easteregg")) {
+                // Easteregg‐Modus einschalten (Flag in GraphPanel setzen)
+                graphPanel.setShowEasterEgg(true);
+                graphPanel.repaint();
+                return;
+            }
+
+            // 2) Ansonsten: normaler Modus
+            graphPanel.setShowEasterEgg(false);
+
             try {
                 Function f = FunctionParser.parse(input);
                 graphModel = new GraphModel(f);
@@ -29,14 +41,15 @@ public class GraphController {
                 graphModel.setShowDerivative(graphViewPanel.isDerivativeSelected());
                 graphPanel.updateGraphModel(graphModel);
             } catch (IllegalArgumentException ex) {
+                graphPanel.setShowEasterEgg(false);
                 JOptionPane.showMessageDialog(graphViewPanel,
                         "Ungültige Funktion: " + ex.getMessage(),
                         "Fehler", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        // Option: Wenn der Benutzer das Kontrollkästchen ändert, aktualisiere die Anzeige (falls bereits ein Graph vorhanden ist)
-        graphViewPanel.addDerivativeCheckboxListener(_ -> {
+        // Checkbox‐Listener bleibt unverändert
+        graphViewPanel.addDerivativeCheckboxListener(_event -> {
             if (graphModel != null) {
                 graphModel.setShowDerivative(graphViewPanel.isDerivativeSelected());
                 graphPanel.repaint();
