@@ -2,24 +2,29 @@ package Taschenrechner.view;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.util.Objects;
 
 import Taschenrechner.controller.GraphController;
 import Taschenrechner.controller.MatrixController;
 import Taschenrechner.model.GraphModel;
 import Taschenrechner.model.PolynomialFunction;
-import Taschenrechner.view.ComplexPanel; // Import für ComplexPanel
+import Taschenrechner.view.ComplexPanel;
 
+/**
+ * MainFrame mit benutzerdefinierter, dunkler Titelleiste und integriertem ComplexPanel.
+ */
 public class MainFrame extends JFrame {
     private final DisplayPanel displayPanel;
     private final ButtonPanel buttonPanel;
     private final JPanel cardPanel;
     private final CardLayout cardLayout;
 
+    // Für Fenster-Verschiebdarstellung
+    private int mouseX, mouseY;
+
     static {
-        // Nimbus Look & Feel aktivieren (Dark-Mode-Anpassung)
+        // Nimbus Look & Feel aktivieren (Dark-Mode)
         try {
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -58,12 +63,21 @@ public class MainFrame extends JFrame {
     }
 
     public MainFrame() {
-        setTitle("Taschenrechner");
+        super(); // Kein Standard-Titel, da wir eigene Titelleiste zeichnen
+
+        // 1) Keine native Dekoration (eigene Titelleiste)
+        setUndecorated(true);
+
+        // 2) Icon für Titelleiste und Taskleiste
         Image icon = new ImageIcon(Objects.requireNonNull(
                 getClass().getResource("/Taschenrechner/assets/app_icon.png")
         )).getImage();
         setIconImage(icon);
 
+        // 3) Eigene dunkle Titelleiste
+        JPanel titleBar = createTitleBar(icon);
+
+        // 4) Restliche Einrichtung
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
@@ -139,12 +153,18 @@ public class MainFrame extends JFrame {
         cardPanel.add(matrixPanel,      "matrix");
         cardPanel.add(complexPanel,     "complex");
 
-        // Standardmäßig Rechner anzeigen
+        // 5) Layout zusammenbauen
+        getContentPane().add(titleBar,   BorderLayout.NORTH);
+        getContentPane().add(sidebar,    BorderLayout.WEST);
+        getContentPane().add(cardPanel,  BorderLayout.CENTER);
+
+        // 6) Standard-Tab und Größe
+        cardLayout.show(cardPanel, "calculator");
         setSize(400, 600);
         setLocationRelativeTo(null);
-        cardLayout.show(cardPanel, "calculator");
+        setVisible(true);
 
-        // Sidebar-Buttons Aktionen
+        // 7) Aktionen für Sidebar-Buttons
         btnCalculator.addActionListener((ActionEvent e) -> {
             cardLayout.show(cardPanel, "calculator");
             setSize(400, 600);
@@ -162,15 +182,76 @@ public class MainFrame extends JFrame {
         });
         btnComplex.addActionListener((ActionEvent e) -> {
             cardLayout.show(cardPanel, "complex");
-            // Fenster so groß wählen, dass "Berechnen"-Button sichtbar ist
-            setSize(650, 500);
+            setSize(650, 500); // Fenstergröße so, dass "Berechnen" sichtbar bleibt
             setLocationRelativeTo(null);
         });
+    }
 
-        add(sidebar,  BorderLayout.WEST);
-        add(cardPanel, BorderLayout.CENTER);
+    /**
+     * Erstellt die benutzerdefinierte, dunkle Titelleiste mit Icon, Titel und transparentem Close-Button.
+     */
+    private JPanel createTitleBar(Image icon) {
+        JPanel titleBar = new JPanel(new BorderLayout());
+        titleBar.setPreferredSize(new Dimension(getWidth(), 32));
+        titleBar.setBackground(UIManager.getColor("nimbusBase"));
+        titleBar.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.BLACK));
 
-        setVisible(true);
+        // Icon (20×20) und Titeltext
+        JLabel lblIcon = new JLabel(new ImageIcon(icon.getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
+        lblIcon.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+        JLabel lblTitle = new JLabel("  Taschenrechner");
+        lblTitle.setForeground(UIManager.getColor("text"));
+        lblTitle.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+        leftPanel.setOpaque(false);
+        leftPanel.add(lblIcon);
+        leftPanel.add(lblTitle);
+
+        // Schließen-Button ("X"), transparent
+        JButton btnClose = new JButton("X");
+        btnClose.setForeground(UIManager.getColor("text"));
+        btnClose.setBackground(new Color(0, 0, 0, 0)); // komplett transparent
+        btnClose.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnClose.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        btnClose.setFocusPainted(false);
+        btnClose.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnClose.addActionListener(e -> System.exit(0));
+
+        // Hover-Effekt: Button-Hintergrund bei Maus drüber
+        btnClose.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btnClose.setBackground(new Color(200, 50, 50));
+                btnClose.setOpaque(true);
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                btnClose.setBackground(new Color(0, 0, 0, 0));
+                btnClose.setOpaque(false);
+            }
+        });
+
+        // Fenster verschiebbar machen
+        titleBar.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                mouseX = e.getX();
+                mouseY = e.getY();
+            }
+        });
+        titleBar.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                int x = e.getXOnScreen() - mouseX;
+                int y = e.getYOnScreen() - mouseY;
+                setLocation(x, y);
+            }
+        });
+
+        titleBar.add(leftPanel, BorderLayout.WEST);
+        titleBar.add(btnClose, BorderLayout.EAST);
+        return titleBar;
     }
 
     private JButton createSidebarButton(String resourcePath, Color bg) {
