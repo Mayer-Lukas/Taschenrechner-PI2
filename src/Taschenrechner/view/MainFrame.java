@@ -209,7 +209,7 @@ public class MainFrame extends JFrame {
         // Icon (20×20) und Titeltext
         JLabel lblIcon = new JLabel(new ImageIcon(icon.getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
         lblIcon.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
-        JLabel lblTitle = new JLabel("  Taschenrechner");
+        JLabel lblTitle = new JLabel("  1RuleX");
         lblTitle.setForeground(UIManager.getColor("text"));
         lblTitle.setFont(new Font("Segoe UI", Font.PLAIN, 16));
 
