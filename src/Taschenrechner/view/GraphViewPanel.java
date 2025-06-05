@@ -11,10 +11,8 @@ public class GraphViewPanel extends JPanel {
     private final JTextField functionInput;
     private final JButton plotButton;
     private final JCheckBox derivativeCheckBox;
-    private final GraphPanel graphPanel;
 
     public GraphViewPanel(GraphPanel graphPanel) {
-        this.graphPanel = graphPanel;
         setLayout(new BorderLayout());
         setBackground(UIManager.getColor("control"));
 
@@ -40,9 +38,7 @@ public class GraphViewPanel extends JPanel {
         derivativeCheckBox.setBackground(UIManager.getColor("control"));
         derivativeCheckBox.setForeground(UIManager.getColor("text"));
         derivativeCheckBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        derivativeCheckBox.addActionListener(e -> {
-            graphPanel.setShowDerivative(derivativeCheckBox.isSelected());
-        });
+        derivativeCheckBox.addActionListener(e -> graphPanel.setShowDerivative(derivativeCheckBox.isSelected()));
 
         JLabel zoomHint = new JLabel("Scrollen zum Zoomen");
         zoomHint.setForeground(new Color(200, 200, 200));

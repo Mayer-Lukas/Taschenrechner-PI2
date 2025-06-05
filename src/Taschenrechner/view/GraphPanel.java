@@ -2,7 +2,6 @@ package Taschenrechner.view;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.awt.geom.Line2D;
 import Taschenrechner.model.Function;
 import Taschenrechner.model.GraphModel;
@@ -94,9 +93,8 @@ public class GraphPanel extends JPanel {
                 g2.setFont(new Font("Segoe UI", Font.PLAIN, 24));
                 FontMetrics fmProf = g2.getFontMetrics();
                 int profAscent = fmProf.getAscent();
-                int profX = margin;
                 int profY = margin + profAscent;
-                g2.drawString(profText, profX, profY);
+                g2.drawString(profText, margin, profY);
             }
             return;
         }
@@ -159,18 +157,16 @@ public class GraphPanel extends JPanel {
         // Zahlenbeschriftungen unten (x) und links (y)
         for (double x = Math.ceil(xMin / xStep) * xStep; x <= xMax; x += xStep) {
             int px = mapX(x, w);
-            int py = xAxisPx;
-            g2.drawLine(px, py - 3, px, py + 3);
+            g2.drawLine(px, xAxisPx - 3, px, xAxisPx + 3);
             String label = formatLabel(x);
-            g2.drawString(label, px - g2.getFontMetrics().stringWidth(label) / 2, py + 15);
+            g2.drawString(label, px - g2.getFontMetrics().stringWidth(label) / 2, xAxisPx + 15);
         }
         for (double y = Math.ceil(yMin / yStep) * yStep; y <= yMax; y += yStep) {
-            int px = yAxisPx;
             int py = mapY(y, h);
-            g2.drawLine(px - 3, py, px + 3, py);
+            g2.drawLine(yAxisPx - 3, py, yAxisPx + 3, py);
             if (Math.abs(y) > 1e-6) {
                 String label = formatLabel(y);
-                g2.drawString(label, px + 5, py + g2.getFontMetrics().getAscent() / 2);
+                g2.drawString(label, yAxisPx + 5, py + g2.getFontMetrics().getAscent() / 2);
             }
         }
     }
@@ -204,7 +200,7 @@ public class GraphPanel extends JPanel {
             int px = mapX(x, w);
             int py = mapY(y, h);
 
-            if (!first && !Double.isNaN(prevY) && !Double.isNaN(py)) {
+            if (!first) {
                 g2.drawLine(prevX, prevY, px, py);
             }
             first = false;

@@ -9,7 +9,6 @@ import Taschenrechner.controller.GraphController;
 import Taschenrechner.controller.MatrixController;
 import Taschenrechner.model.GraphModel;
 import Taschenrechner.model.PolynomialFunction;
-import Taschenrechner.view.ComplexPanel;
 
 /**
  * MainFrame mit benutzerdefinierter, dunkler Titelleiste und integriertem ComplexPanel.
@@ -229,7 +228,7 @@ public class MainFrame extends JFrame {
         btnClose.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnClose.addActionListener(e -> System.exit(0));
 
-        // Hover-Effekt: Button-Hintergrund bei Maus drüber
+        // Hover-Effekt: Button-Hintergrund bei Maus darüber
         btnClose.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
