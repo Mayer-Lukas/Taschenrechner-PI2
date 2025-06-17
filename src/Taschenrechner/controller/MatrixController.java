@@ -8,6 +8,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
 
+/**
+ * Controller für die Matrix-Berechnungen.
+ */
 public class MatrixController {
     private final MatrixPanel view;
 
@@ -16,6 +19,10 @@ public class MatrixController {
         view.addComputeListener(new ComputeListener());
     }
 
+    /**
+     * Listener für die Berechnungs-Buttons.
+     * Führt die entsprechende Matrix-Operation aus.
+     */
     private class ComputeListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -102,8 +109,8 @@ public class MatrixController {
             double[][] a = view.getMatrixA();
             int rows = a.length;
             int cols = a[0].length;
-            if (cols != rows + 1) {
-                throw new IllegalArgumentException("LGS‐Matrix muss n×(n+1) sein.");
+            if (cols != rows+1) {
+                throw new IllegalArgumentException("LGS‐Matrix muss n x (n+1) sein.");
             }
             Matrix mA = new Matrix(rows, cols, deepCopy(a));
             double[] sol = mA.solve();
