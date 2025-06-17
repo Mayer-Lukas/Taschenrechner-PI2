@@ -4,7 +4,10 @@ import Taschenrechner.model.Function;
 import Taschenrechner.model.PolynomialFunction;
 
 /**
- * FunctionParser verbessert, damit '-x^2' korrekt als '-(x^2)' und nicht als '(-x)^2' ausgewertet wird.
+ * Ein Parser für mathematische Funktionen, der die Operatoren +, -, *, /, ^ sowie
+ * Funktionen wie sin, cos, tan, sqrt, log, ln unterstützt und runde Klammern korrekt auswertet.
+ * Dieser Parser verwendet einen rekursiven Abstieg-Algorithmus.
+ * Dieser Parser wird für die Darstellung von Graphen in der GUI benötigt.
  */
 public class FunctionParser {
 
