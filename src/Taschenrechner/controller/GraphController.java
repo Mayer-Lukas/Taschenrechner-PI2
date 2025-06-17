@@ -8,6 +8,11 @@ import Taschenrechner.view.GraphViewPanel;
 
 import javax.swing.*;
 
+/**
+ * Controller für die Graphen‐Ansicht.
+ * Reagiert auf Button-Klicks, parst die eingegebene Funktion und aktualisiert das GraphPanel.
+ * Enthält auch einen Easter-Egg-Modus, der aktiviert wird, wenn das Schlüsselwort "easteregg" eingegeben wird.
+ */
 public class GraphController {
     private final GraphViewPanel graphViewPanel;
     private GraphModel graphModel;
@@ -19,6 +24,11 @@ public class GraphController {
         initializeListeners();
     }
 
+    /**
+     * Initialisiert die Event-Listener für die GraphViewPanel-Komponenten.
+     * Reagiert auf Button-Klicks und Checkbox-Änderungen.
+     * Aktualisiert das GraphPanel entsprechend der eingegebenen Funktion.
+     */
     private void initializeListeners() {
         graphViewPanel.addPlotButtonListener(_event -> {
             String input = graphViewPanel.getFunctionInput().trim();
