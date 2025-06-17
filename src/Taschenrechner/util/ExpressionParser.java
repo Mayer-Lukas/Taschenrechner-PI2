@@ -20,6 +20,7 @@ import Taschenrechner.model.FunctionExpression;
  * Ein Ausdrucksparser, der die Operatoren +, -, *, /, ^ sowie
  * Funktionen sin, cos, tan, sqrt, log, ln, exp unterstützt und
  * runde Klammern korrekt auswertet.
+ * Dieser Parser verwendet den Shunting-Yard-Algorithmus um die Ausdrücke im normalen Taschenrechner zu parsen.
  */
 public class ExpressionParser {
     /**
