@@ -1,5 +1,8 @@
 package Taschenrechner.model;
 
+/**
+ * Klasse für binäre Operationen im Taschenrechner.
+ */
 public class BinaryOperation implements Expression {
     private final Expression left;
     private final Expression right;

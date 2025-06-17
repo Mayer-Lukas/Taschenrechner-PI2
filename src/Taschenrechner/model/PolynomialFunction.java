@@ -1,5 +1,8 @@
 package Taschenrechner.model;
 
+/**
+ * Repräsentiert Polynomfunktionen im Taschenrechner.
+ */
 public class PolynomialFunction implements Function {
     // coefficients[0] * x^(n-1) + coefficients[1] * x^(n-2) + ... + coefficients[n-1] * x^0
     private final double[] coefficients;
@@ -10,6 +13,10 @@ public class PolynomialFunction implements Function {
         this.coefficients = coefficients;
     }
 
+    /**
+     * Konstruktor für konstante Polynome.
+     * @param x der konstante Wert des Polynoms
+     */
     @Override
     public double evaluate(double x) {
         // Horner-Schema für absteigende Koeffizienten:

@@ -1,5 +1,8 @@
 package Taschenrechner.model;
 
+/**
+ * Modell für Matrizen im Taschenrechner.
+ */
 public class Matrix {
     private final double[][] data;
     private final int rows;
@@ -33,6 +36,11 @@ public class Matrix {
 
     // Weitere Methoden wie Addition
 
+    /**
+     * Addiert zwei Matrizen.
+     * @param matrix2 Die zweite Matrix, die addiert werden soll.
+     * @return Die resultierende Matrix nach der Addition.
+     */
     public Matrix add(Matrix matrix2) {
         if(this.getRows() != matrix2.getRows() || this.getCols() != matrix2.getCols()) {
             throw new IllegalArgumentException("Die Matrizen sind nicht kompatibel für die Addition.");
@@ -48,6 +56,12 @@ public class Matrix {
         }
         return result;
     }
+
+    /**
+     * Subtrahiert zwei Matrizen.
+     * @param matrix2 Die zweite Matrix, die subtrahiert werden soll.
+     * @return Die resultierende Matrix nach der Subtraktion.
+     */
     public Matrix sub(Matrix matrix2) {
         if(this.getRows() != matrix2.getRows() || this.getCols() != matrix2.getCols()) {
             throw new IllegalArgumentException("Die Matrizen sind nicht kompatibel für die Addition.");
@@ -64,6 +78,11 @@ public class Matrix {
         return result;
     }
 
+    /**
+     * Multipliziert zwei Matrizen.
+     * @param m2 Die zweite Matrix, die multipliziert werden soll.
+     * @return Die resultierende Matrix nach der Multiplikation.
+     */
     public Matrix mult(Matrix m2) {
         if(this.getRows() != m2.getCols()){
             throw new IllegalArgumentException("Die Matrizen sind nicht kompatibel für die Multiplikation.");
@@ -83,6 +102,11 @@ public class Matrix {
         }
         return result;
     }
+
+    /**
+     * Transponiert die Matrix.
+     * @return Die transponierte Matrix.
+     */
     public Matrix transpose() {
         // Für die transponierte Matrix brauchen wir cols Zeilen und rows Spalten
         double[][] d = new double[cols][rows];
@@ -94,17 +118,30 @@ public class Matrix {
         return new Matrix(cols, rows, d);
     }
 
+    /**
+     * Wandelt die Matrix in Zeilen-Stufen-Form (Row Echelon Form) mithilfe des GaussianSolver um.
+     * @return Die Matrix in Zeilen-Stufen-Form.
+     */
     public Matrix rowEchelonForm() {
         double[][] mat1 = this.getData();
         GaussianSolver solver = new GaussianSolver(mat1);
         return new Matrix(this.getRows(), this.getCols(), solver.toRowEchelon());
     }
 
+    /**
+     * Löst das Gleichungssystem Ax = b, wobei A die Matrix ist und b der rechte Vektor.
+     * Dies geschieht mittels des Gauß-Algorithmus mit partieller Pivotisierung im GaussianSolver.
+     * @return Der Lösungsvektor x.
+     * @throws ArithmeticException falls die Matrix singulär oder nahe singulär ist
+     */
     public double[] solve() {
         GaussianSolver solver = new GaussianSolver(this.getData());
         return solver.solve();
     }
 
+    /**
+     * Gibt die Matrix in einem lesbaren Format aus (Diese war nur für Testzwecke, sie wird nicht für Funktionalitäten benötigt).
+     */
     public void printMatrix() {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {

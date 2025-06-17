@@ -1,5 +1,9 @@
 package Taschenrechner.model;
 
+/**
+ * Modell für den Graphen im Taschenrechner.
+ * Stellt die Funktion, ihre Ableitung und den Wertebereich dar.
+ */
 public class GraphModel {
     private final Function function;
     private final Function derivative;

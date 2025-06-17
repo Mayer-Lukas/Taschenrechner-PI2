@@ -3,7 +3,7 @@ package Taschenrechner.model;
 /**
  * Repräsentiert eine komplexe Zahl a + b i.
  * Unterstützt nur: Addition, Subtraktion, Multiplikation,
- * Division, Konjugation und Betrag (Modul).
+ * Division, Konjugation und Betrag
  */
 public class Complex {
     private final double re;
@@ -60,6 +60,10 @@ public class Complex {
         return Math.hypot(re, im);
     }
 
+    /**
+     * String-Repräsentation der komplexen Zahl.
+     * Die Ausgabe erfolgt im Format "a + b i" oder "a - b i",
+     */
     @Override
     public String toString() {
         // Ausgabe: "a + b i" oder "a - b i" (jeweils mit 3 Nachkommastellen)
