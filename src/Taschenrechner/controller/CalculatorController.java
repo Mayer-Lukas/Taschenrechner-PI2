@@ -42,7 +42,7 @@ public class CalculatorController implements ActionListener {
 
             case "CE":
                 // Letztes Zeichen löschen
-                if (currentInput.length() > 0) {
+                if (!currentInput.isEmpty()) {
                     currentInput.deleteCharAt(currentInput.length() - 1);
                     display.setText(currentInput.toString());
                 }
@@ -68,7 +68,7 @@ public class CalculatorController implements ActionListener {
                 }
                 break;
 
-            // ---------- Funktionen, √, Konstanten, ^ ----------
+            // ---------- Trigonometrische Funktionen, √, Konstanten, ^ ----------
             case "sin":
             case "cos":
             case "tan":
@@ -137,7 +137,7 @@ public class CalculatorController implements ActionListener {
         JOptionPane.showMessageDialog(
                 null,
                 "",
-                "Division durch Null",
+                "So nicht!",
                 JOptionPane.INFORMATION_MESSAGE,
                 icon
         );
