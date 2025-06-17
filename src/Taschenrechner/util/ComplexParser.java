@@ -9,11 +9,6 @@ import Taschenrechner.model.Complex;
  *   - Klammerausdrücke: (… )
  *   - Operatoren:  +, -, *, /
  *   - Funktionen:  conj(z), abs(z)
- * <p>
- * Beispiele:
- *   ComplexParser.parse("3 + 4i")
- *   ComplexParser.parse("(1-2i)*(3 + 5i)")
- *   ComplexParser.parse("conj(2-3i) + abs(3-4i)")
  */
 public class ComplexParser {
     private final String input;
@@ -130,8 +125,7 @@ public class ComplexParser {
      *   - a+bi  (z.B. "3+4i", "2-5i")
      *   - bi    (z.B. "3i", "-2i", "+i")
      *   - a     (reine reelle Zahl, z.B. "5", "-3.2")
-     * <p>
-     * Liefert ein Complex-Objekt oder null, wenn kein Literal passt.
+     * liefert ein Complex-Objekt oder null, wenn kein Literal passt.
      */
     private Complex parseComplexLiteral() {
         int start = pos;
